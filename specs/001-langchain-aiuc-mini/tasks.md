@@ -24,10 +24,10 @@ Single project. Код — `src/aiuc_mini/`, тесты — `tests/`, набор
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Инициализировать пакет: `pyproject.toml` (Python 3.11+, hatchling, пакет `aiuc_mini`), зависимости `langchain~=1.3`, `langgraph~=1.2`, `langchain-core~=1.4`, `pydantic~=2.13`, `typer~=0.26`, `pyyaml`; extras `anthropic`/`openai`/`ollama`; dev-группа `pytest~=9.1`, `pytest-asyncio`, `ruff`. Зафиксировать `uv.lock` (`uv sync`)
-- [ ] T002 [P] Создать дерево каталогов `src/aiuc_mini/{llm,sandbox,target,guardrails,redteam,scorecard,trace}/__init__.py` и `tests/{isolation,determinism,unit,integration}/` согласно plan.md
-- [ ] T003 [P] Создать `.env.example` с `LLM_TARGET`, `LLM_REDTEAM`, `ANTHROPIC_API_KEY` по контракту [contracts/cli.md](contracts/cli.md)
-- [ ] T004 [P] Настроить `ruff` и `pytest` в `pyproject.toml`: `testpaths=tests`, маркеры `isolation`, `determinism`; включить `pytest --strict-markers`
+- [X] T001 Инициализировать пакет: `pyproject.toml` (Python 3.11+, hatchling, пакет `aiuc_mini`), зависимости `langchain~=1.3`, `langgraph~=1.2`, `langchain-core~=1.4`, `pydantic~=2.13`, `typer~=0.26`, `pyyaml`; extras `anthropic`/`openai`/`ollama`; dev-группа `pytest~=9.1`, `pytest-asyncio`, `ruff`. Зафиксировать `uv.lock` (`uv sync`)
+- [X] T002 [P] Создать дерево каталогов `src/aiuc_mini/{llm,sandbox,target,guardrails,redteam,scorecard,trace}/__init__.py` и `tests/{isolation,determinism,unit,integration}/` согласно plan.md
+- [X] T003 [P] Создать `.env.example` с `LLM_TARGET`, `LLM_REDTEAM`, `ANTHROPIC_API_KEY` по контракту [contracts/cli.md](contracts/cli.md)
+- [X] T004 [P] Настроить `ruff` и `pytest` в `pyproject.toml`: `testpaths=tests`, маркеры `isolation`, `determinism`; включить `pytest --strict-markers`
 
 **Checkpoint**: `uv sync` проходит, `uv run pytest` собирается (0 тестов), импорт `aiuc_mini` работает.
 
@@ -40,24 +40,24 @@ Single project. Код — `src/aiuc_mini/`, тесты — `tests/`, набор
 
 ### Конфигурация и шов модели
 
-- [ ] T005 [P] Реализовать `Config` (Pydantic Settings) в `src/aiuc_mini/config.py`: `target_model`, `redteam_model`, `guardrails_enabled`, `max_mutations`, `attempt_timeout_s`, `suite_path`, `runs_dir` — поля и правила по [data-model.md](data-model.md) §1. API-ключи в `Config` **не хранятся**
-- [ ] T006 [P] Реализовать фабрику модели в `src/aiuc_mini/llm/factory.py`: тонкая обёртка над `langchain.chat_models.init_chat_model` со строкой `provider:model`. Это **единственное** место создания модели в проекте
-- [ ] T007 Тест в `tests/unit/test_llm_seam.py`: агенты принимают `BaseChatModel` параметром и работают с `FakeListChatModel` — доказать, что фабрика не вызывается из бизнес-логики (шов Принципа IV)
+- [X] T005 [P] Реализовать `Config` (Pydantic Settings) в `src/aiuc_mini/config.py`: `target_model`, `redteam_model`, `guardrails_enabled`, `max_mutations`, `attempt_timeout_s`, `suite_path`, `runs_dir` — поля и правила по [data-model.md](data-model.md) §1. API-ключи в `Config` **не хранятся**
+- [X] T006 [P] Реализовать фабрику модели в `src/aiuc_mini/llm/factory.py`: тонкая обёртка над `langchain.chat_models.init_chat_model` со строкой `provider:model`. Это **единственное** место создания модели в проекте
+- [X] T007 Тест в `tests/unit/test_llm_seam.py`: агенты принимают `BaseChatModel` параметром и работают с `FakeListChatModel` — доказать, что фабрика не вызывается из бизнес-логики (шов Принципа IV)
 
 ### Журнал (Принцип V)
 
-- [ ] T008 [P] Реализовать Pydantic-модели событий в `src/aiuc_mini/trace/events.py`: `run_started`, `attempt_started`, `guardrail_decision`, `tool_call`, `tool_result`, `sandbox_violation`, `agent_response`, `verdict`, `attempt_error`, `run_finished` — точно по [contracts/trace-events.md](contracts/trace-events.md), с общими полями `type/run_id/attempt_id/seq/ts`
-- [ ] T009 Реализовать `TraceWriter`/`TraceReader` в `src/aiuc_mini/trace/writer.py`: JSONL, монотонный `seq`, маскирование канарейки в `<CANARY>` при записи **всех** событий кроме `verdict.leaked_via`
-- [ ] T010 Тест в `tests/unit/test_trace_masking.py`: секрет, переданный в любое событие, не появляется в JSONL в открытом виде (журнал не должен сам становиться каналом утечки); `seq` строго возрастает
+- [X] T008 [P] Реализовать Pydantic-модели событий в `src/aiuc_mini/trace/events.py`: `run_started`, `attempt_started`, `guardrail_decision`, `tool_call`, `tool_result`, `sandbox_violation`, `agent_response`, `verdict`, `attempt_error`, `run_finished` — точно по [contracts/trace-events.md](contracts/trace-events.md), с общими полями `type/run_id/attempt_id/seq/ts`
+- [X] T009 Реализовать `TraceWriter`/`TraceReader` в `src/aiuc_mini/trace/writer.py`: JSONL, монотонный `seq`, маскирование канарейки в `<CANARY>` при записи **всех** событий кроме `verdict.leaked_via`
+- [X] T010 Тест в `tests/unit/test_trace_masking.py`: секрет, переданный в любое событие, не появляется в JSONL в открытом виде (журнал не должен сам становиться каналом утечки); `seq` строго возрастает
 
 ### Песочница (Принцип II) 🔒
 
-- [ ] T011 [P] Реализовать `Sandbox` в `src/aiuc_mini/sandbox/fs.py`: tmp-root через `tempfile.mkdtemp()`, резолв пути `(root/path).resolve()` + проверка `is_relative_to(root.resolve())`, исключение `SandboxViolation`, очистка root по завершении
-- [ ] T012 [P] Реализовать фиктивный интерпретатор в `src/aiuc_mini/sandbox/shell.py`: whitelist `ls`/`cat`/`echo`/`whoami`/`env` поверх виртуальной ФС; всё остальное (`rm`, `curl`, `|`, `;`, `&&`, `$(...)`) → смоделированная ошибка. `env` возвращает фиктивное окружение **без реальных переменных хоста и ключей**. Импорт `subprocess`/`os.system`/`os.popen` в модуле запрещён
-- [ ] T013 [P] Реализовать фикстурный HTTP-транспорт в `src/aiuc_mini/sandbox/http.py`: словарь `url → HttpResponse`, включая «отравленную» страницу для indirect injection; неизвестный URL → смоделированная 404. Реальный сетевой стек не используется
-- [ ] T014 🔒 [P] Гейт изоляции: `tests/isolation/test_shell_no_subprocess.py` — `rm -rf /`, `curl …`, `$(…)`, `;`-цепочки не исполняются; статически проверить отсутствие импорта `subprocess` в `sandbox/shell.py`
-- [ ] T015 🔒 [P] Гейт изоляции: `tests/isolation/test_fs_boundaries.py` — `../../etc/passwd`, абсолютный `/etc/passwd`, symlink наружу, `~`-раскрытие — все отбиты с `SandboxViolation`
-- [ ] T016 🔒 [P] Гейт изоляции: `tests/isolation/test_http_no_network.py` — ни один URL не порождает реального сетевого вызова (замокать сокет и убедиться, что он не тронут)
+- [X] T011 [P] Реализовать `Sandbox` в `src/aiuc_mini/sandbox/fs.py`: tmp-root через `tempfile.mkdtemp()`, резолв пути `(root/path).resolve()` + проверка `is_relative_to(root.resolve())`, исключение `SandboxViolation`, очистка root по завершении
+- [X] T012 [P] Реализовать фиктивный интерпретатор в `src/aiuc_mini/sandbox/shell.py`: whitelist `ls`/`cat`/`echo`/`whoami`/`env` поверх виртуальной ФС; всё остальное (`rm`, `curl`, `|`, `;`, `&&`, `$(...)`) → смоделированная ошибка. `env` возвращает фиктивное окружение **без реальных переменных хоста и ключей**. Импорт `subprocess`/`os.system`/`os.popen` в модуле запрещён
+- [X] T013 [P] Реализовать фикстурный HTTP-транспорт в `src/aiuc_mini/sandbox/http.py`: словарь `url → HttpResponse`, включая «отравленную» страницу для indirect injection; неизвестный URL → смоделированная 404. Реальный сетевой стек не используется
+- [X] T014 🔒 [P] Гейт изоляции: `tests/isolation/test_shell_no_subprocess.py` — `rm -rf /`, `curl …`, `$(…)`, `;`-цепочки не исполняются; статически проверить отсутствие импорта `subprocess` в `sandbox/shell.py`
+- [X] T015 🔒 [P] Гейт изоляции: `tests/isolation/test_fs_boundaries.py` — `../../etc/passwd`, абсолютный `/etc/passwd`, symlink наружу, `~`-раскрытие — все отбиты с `SandboxViolation`
+- [X] T016 🔒 [P] Гейт изоляции: `tests/isolation/test_http_no_network.py` — ни один URL не порождает реального сетевого вызова (замокать сокет и убедиться, что он не тронут)
 
 **Checkpoint** 🔒: `uv run pytest tests/isolation/` зелёный. **Принцип II доказан — только после
 этого можно давать инструменты агенту.**

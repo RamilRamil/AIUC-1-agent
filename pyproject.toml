@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aiuc-mini"
+version = "0.1.0"
+description = "Учебный стенд по безопасности AI-агентов на LangChain/LangGraph — «AIUC-1 в миниатюре»"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "langchain~=1.3",
+    "langgraph~=1.2",
+    "langchain-core~=1.4",
+    "pydantic~=2.13",
+    "pydantic-settings~=2.7",
+    "typer~=0.26",
+    "pyyaml~=6.0",
+]
+
+[project.optional-dependencies]
+anthropic = ["langchain-anthropic~=1.4"]
+openai = ["langchain-openai~=1.3"]
+ollama = ["langchain-ollama~=1.1"]
+
+[project.scripts]
+aiuc = "aiuc_mini.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest~=9.1",
+    "pytest-asyncio~=1.4",
+    "ruff~=0.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aiuc_mini"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+asyncio_mode = "auto"
+markers = [
+    "isolation: гейт Принципа II — изоляция песочницы (NON-NEGOTIABLE)",
+    "determinism: гейт Принципа IV — воспроизводимость scorecard/судьи",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

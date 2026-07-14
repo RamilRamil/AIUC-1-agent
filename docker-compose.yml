@@ -1,0 +1,42 @@
+# Точки входа для разработки. Всё исполняется в контейнере, не на хосте.
+#
+#   docker compose build            — собрать образ
+#   docker compose run --rm test    — прогнать pytest (без API-ключей)
+#   docker compose run --rm gates   — только гейты конституции (изоляция + детерминизм)
+#   docker compose run --rm aiuc demo   — учебная демонстрация (нужен .env с ключом)
+#   docker compose run --rm lint    — ruff
+
+services:
+  # Базовый образ: код примонтирован, поэтому правки видны без пересборки.
+  app:
+    build: .
+    image: aiuc-mini:latest
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./attacks:/app/attacks
+      - ./runs:/app/runs
+    env_file:
+      - path: .env
+        required: false
+
+  # Полный прогон тестов на fake-модели — ключи не нужны.
+  test:
+    extends: app
+    command: ["pytest", "-q"]
+
+  # Только гейты Принципов II и IV.
+  gates:
+    extends: app
+    command: ["pytest", "-q", "-m", "isolation or determinism"]
+
+  # Линтер.
+  lint:
+    extends: app
+    command: ["ruff", "check", "src", "tests"]
+
+  # CLI: `docker compose run --rm aiuc <args>`.
+  aiuc:
+    extends: app
+    entrypoint: ["uv", "run", "aiuc"]
+    command: ["--help"]
