@@ -1,5 +1,7 @@
 # langchain-aiuc-mini
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Учебный проект по безопасности AI-агентов на **LangChain / LangGraph** — «AIUC-1 в миниатюре».
 
 Цель — прокачать практический опыт работы с LangChain и предметно изучить безопасность
@@ -22,4 +24,16 @@ Accountability, Society).
 
 Управляется через **Spec Kit**. Текущая фича: [specs/001-langchain-aiuc-mini](specs/001-langchain-aiuc-mini/spec.md).
 
-Следующий шаг: `/speckit-clarify` (опционально) → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement`.
+Правила проекта (изоляция песочницы, объективные критерии, воспроизводимость, наблюдаемость)
+зафиксированы в [конституции](.specify/memory/constitution.md).
+
+Пройдено: `/speckit-constitution` → `/speckit-specify` → `/speckit-plan` → `/speckit-tasks`.
+Следующий шаг: `/speckit-implement` (кода пока нет — только спецификация, план и 51 задача).
+
+План и обоснования решений: [plan.md](specs/001-langchain-aiuc-mini/plan.md),
+[research.md](specs/001-langchain-aiuc-mini/research.md),
+[tasks.md](specs/001-langchain-aiuc-mini/tasks.md).
+
+## Лицензия
+
+[MIT](LICENSE) © 2026 Ramil Mustafin
