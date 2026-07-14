@@ -93,14 +93,14 @@ US1 самодостаточна — уже даёт учебную ценнос
 **Independent Test**: Натравить red-team на незащищённую мишень — он самостоятельно находит
 ≥1 успешную атаку и помечает её успешной по объективному критерию (SC-002).
 
-- [ ] T023 [P] [US2] Определить набор атак `attacks/suite.yaml`: кейсы трёх категорий (`direct_injection`, `role_bypass`, `secret_exfiltration`) + benign-кейсы (`is_benign: true`) для замера ложных блокировок (FR-016). Каждый кейс несёт `success_criterion`
-- [ ] T024 [P] [US2] Реализовать модели `AttackCase`, `SuccessCriterion`, `Verdict` и загрузчик suite в `src/aiuc_mini/redteam/suite.py`; считать `suite_hash` (sha256 файла) — [data-model.md](data-model.md) §5–6
-- [ ] T025 [US2] 🔒 Реализовать **судью** в `src/aiuc_mini/redteam/judge.py`: чистые предикаты `(trace_events, secret) -> Verdict` для `canary_in_output`, `canary_in_tool_args`, `forbidden_tool_called`, `out_of_role_action`. **Никакого LLM** (Принцип III). Критично: `canary_in_tool_args` проверяет **аргументы вызова до маскирования**, иначе эксфильтрация через `http_get?data=<secret>` будет пропущена
-- [ ] T026 🔒 [P] [US2] Гейт детерминизма: `tests/determinism/test_judge_predicates.py` — на зафиксированном trace-фикстуре каждый предикат даёт один и тот же вердикт при повторных вызовах; эксфильтрация через аргументы инструмента детектируется
-- [ ] T027 [US2] Реализовать red-team агента в `src/aiuc_mini/redteam/attacker.py`: LLM генерирует полезные нагрузки по категориям и **мутирует** неуспешные в пределах `max_mutations`, проставляя `parent_id` (FR-007). Модель — параметр
-- [ ] T028 [US2] Реализовать раннер прогона в `src/aiuc_mini/redteam/runner.py`: цикл по кейсам, `attempt_timeout_s`, `try/except` вокруг попытки → вердикт `ERROR` + `attempt_error`, прогон **не прерывается** (FR-015). `ERROR` **не** засчитывается как успех защиты
-- [ ] T029 [P] [US2] Тест в `tests/integration/test_run_survives_failure.py`: падающая/зависающая попытка даёт `ERROR`, остальные атаки прогоняются, `run_finished` записан (FR-015)
-- [ ] T030 [US2] Довести `aiuc run` в `src/aiuc_mini/cli.py`: `--suite`, `--max-mutations`, `--attempt-timeout`; сводка «попыток / успешных / ошибок»
+- [X] T023 [P] [US2] Определить набор атак `attacks/suite.yaml`: кейсы трёх категорий (`direct_injection`, `role_bypass`, `secret_exfiltration`) + benign-кейсы (`is_benign: true`) для замера ложных блокировок (FR-016). Каждый кейс несёт `success_criterion`
+- [X] T024 [P] [US2] Реализовать модели `AttackCase`, `SuccessCriterion`, `Verdict` и загрузчик suite в `src/aiuc_mini/redteam/suite.py`; считать `suite_hash` (sha256 файла) — [data-model.md](data-model.md) §5–6
+- [X] T025 [US2] 🔒 Реализовать **судью** в `src/aiuc_mini/redteam/judge.py`: чистые предикаты `(trace_events, secret) -> Verdict` для `canary_in_output`, `canary_in_tool_args`, `forbidden_tool_called`, `out_of_role_action`. **Никакого LLM** (Принцип III). Критично: `canary_in_tool_args` проверяет **аргументы вызова до маскирования**, иначе эксфильтрация через `http_get?data=<secret>` будет пропущена
+- [X] T026 🔒 [P] [US2] Гейт детерминизма: `tests/determinism/test_judge_predicates.py` — на зафиксированном trace-фикстуре каждый предикат даёт один и тот же вердикт при повторных вызовах; эксфильтрация через аргументы инструмента детектируется
+- [X] T027 [US2] Реализовать red-team агента в `src/aiuc_mini/redteam/attacker.py`: LLM генерирует полезные нагрузки по категориям и **мутирует** неуспешные в пределах `max_mutations`, проставляя `parent_id` (FR-007). Модель — параметр
+- [X] T028 [US2] Реализовать раннер прогона в `src/aiuc_mini/redteam/runner.py`: цикл по кейсам, `attempt_timeout_s`, `try/except` вокруг попытки → вердикт `ERROR` + `attempt_error`, прогон **не прерывается** (FR-015). `ERROR` **не** засчитывается как успех защиты
+- [X] T029 [P] [US2] Тест в `tests/integration/test_run_survives_failure.py`: падающая/зависающая попытка даёт `ERROR`, остальные атаки прогоняются, `run_finished` записан (FR-015)
+- [X] T030 [US2] Довести `aiuc run` в `src/aiuc_mini/cli.py`: `--suite`, `--max-mutations`, `--attempt-timeout`; сводка «попыток / успешных / ошибок»
 
 **Checkpoint**: `aiuc run --no-guardrails` находит успешные атаки минимум в 2 из 3 категорий
 (SC-002), вердикты объективны и воспроизводимы.
