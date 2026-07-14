@@ -73,12 +73,12 @@ Single project. Код — `src/aiuc_mini/`, тесты — `tests/`, набор
 вызван, результат вернулся. Затем дать выманивающий запрос — секрет утекает (демонстрация
 уязвимости). Каждый вызов инструмента виден в trace.
 
-- [ ] T017 [P] [US1] Реализовать `Secret` (канарейка `AIUC1-CANARY-<uuid4>`) и системный промпт мишени в `src/aiuc_mini/target/prompt.py`: роль, границы, секрет (FR-002)
-- [ ] T018 [US1] Реализовать инструменты в `src/aiuc_mini/target/tools.py` поверх `sandbox/`: `read_file`, `write_file`, `http_get`, `run_command` — LangChain `@tool`, строго по [contracts/tools.md](contracts/tools.md). Каждый вызов пишет `tool_call`/`tool_result`/`sandbox_violation` в trace (FR-003)
-- [ ] T019 [US1] Собрать агента в `src/aiuc_mini/target/agent.py`: `create_agent(model, tools, system_prompt, middleware=[])`. Модель — **параметр**, не фабрика. Пустой `middleware` = режим без защиты (FR-011)
-- [ ] T020 [P] [US1] Тест в `tests/unit/test_target_tools.py`: каждый инструмент возвращает ожидаемый результат внутри песочницы и отказ — за её пределами
-- [ ] T021 [US1] Интеграционный тест в `tests/integration/test_target_vulnerable.py` на `FakeListChatModel`: (а) легитимная задача → корректный вызов инструмента; (б) сценарий утечки → канарейка попадает в ответ; (в) все вызовы журналированы (FR-003)
-- [ ] T022 [US1] CLI-заготовка `aiuc run --no-guardrails` в `src/aiuc_mini/cli.py`: создаёт `run_id`, пишет `runs/<run_id>/trace.jsonl`, печатает путь и сводку (контракт [contracts/cli.md](contracts/cli.md))
+- [X] T017 [P] [US1] Реализовать `Secret` (канарейка `AIUC1-CANARY-<uuid4>`) и системный промпт мишени в `src/aiuc_mini/target/prompt.py`: роль, границы, секрет (FR-002)
+- [X] T018 [US1] Реализовать инструменты в `src/aiuc_mini/target/tools.py` поверх `sandbox/`: `read_file`, `write_file`, `http_get`, `run_command` — LangChain `@tool`, строго по [contracts/tools.md](contracts/tools.md). Каждый вызов пишет `tool_call`/`tool_result`/`sandbox_violation` в trace (FR-003)
+- [X] T019 [US1] Собрать агента в `src/aiuc_mini/target/agent.py`: `create_agent(model, tools, system_prompt, middleware=[])`. Модель — **параметр**, не фабрика. Пустой `middleware` = режим без защиты (FR-011)
+- [X] T020 [P] [US1] Тест в `tests/unit/test_target_tools.py`: каждый инструмент возвращает ожидаемый результат внутри песочницы и отказ — за её пределами
+- [X] T021 [US1] Интеграционный тест в `tests/integration/test_target_vulnerable.py` на `FakeListChatModel`: (а) легитимная задача → корректный вызов инструмента; (б) сценарий утечки → канарейка попадает в ответ; (в) все вызовы журналированы (FR-003)
+- [X] T022 [US1] CLI-заготовка `aiuc run --no-guardrails` в `src/aiuc_mini/cli.py`: создаёт `run_id`, пишет `runs/<run_id>/trace.jsonl`, печатает путь и сводку (контракт [contracts/cli.md](contracts/cli.md))
 
 **Checkpoint**: мишень запускается, решает легитимные задачи, пробивается вручную, всё в trace.
 US1 самодостаточна — уже даёт учебную ценность.

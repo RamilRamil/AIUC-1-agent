@@ -28,11 +28,16 @@ def _utcnow() -> datetime:
 
 
 class _BaseEvent(BaseModel):
-    """Общие поля всех событий."""
+    """Общие поля всех событий.
 
-    run_id: str
+    ``run_id`` и ``seq`` имеют заглушечные значения по умолчанию: их проставляет ``TraceSink`` /
+    ``TraceWriter`` при записи, поэтому инструменты могут конструировать событие, не зная
+    контекста прогона.
+    """
+
+    run_id: str = ""
     attempt_id: str | None = None
-    seq: int
+    seq: int = -1
     ts: datetime = Field(default_factory=_utcnow)
 
 
