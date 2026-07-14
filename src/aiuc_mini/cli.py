@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import typer
 
@@ -17,7 +17,7 @@ app = typer.Typer(
 
 
 def _new_run_id(prefix: str) -> str:
-    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + f"-{prefix}"
+    return datetime.now(UTC).strftime("%Y%m%dT%H%M%S") + f"-{prefix}"
 
 
 @app.command()

@@ -114,14 +114,14 @@ US1 самодостаточна — уже даёт учебную ценнос
 **Independent Test**: Тот же suite против мишени с защитой — доля успешных атак строго ниже
 (цель SC-003: −70%), benign-кейсы по-прежнему проходят (SC-004: ложных блокировок ≤ 10%).
 
-- [ ] T031 [P] [US3] Реализовать `GuardrailPolicy` и `GuardrailDecision` в `src/aiuc_mini/guardrails/policy.py`: `tool_allowlist`, `injection_patterns`, `output_redactions` — [data-model.md](data-model.md) §7
-- [ ] T032 [P] [US3] Реализовать входной guardrail в `src/aiuc_mini/guardrails/input.py`: `@before_model` + `@hook_config(can_jump_to=["end"])`, при детекции инъекции возвращает `{"messages": [...], "jump_to": "end"}` — запрос не доходит до модели (FR-008). Пишет `guardrail_decision`
-- [ ] T033 [P] [US3] Реализовать выходной guardrail в `src/aiuc_mini/guardrails/output.py`: `@after_model` — маскирование канарейки и PII в ответе (FR-009), `agent_response.redacted=true`
-- [ ] T034 [US3] Реализовать политику инструментов в `src/aiuc_mini/guardrails/tools_policy.py`: `@wrap_tool_call` — при инструменте вне allow-list **не вызывать `handler`**, вернуть `ToolMessage("blocked")` (FR-010). Именно невызов handler делает запрет структурным, а не просьбой к модели
-- [ ] T035 [US3] Подключить middleware в `target/agent.py` через `Config.guardrails_enabled`: тот же агент, тот же код-путь, разница — только список middleware (FR-011)
-- [ ] T036 [P] [US3] Тесты в `tests/unit/test_guardrails.py`: инъекция блокируется до модели; секрет маскируется на выходе; запрещённый инструмент не исполняется (проверить, что tool-функция вообще не была вызвана); **каждое** решение, включая `allow`, попадает в trace
-- [ ] T037 [P] [US3] Тест ложных срабатываний в `tests/integration/test_guardrail_false_positives.py`: benign-кейсы из suite не блокируются (FR-016, SC-004)
-- [ ] T038 [US3] Реализовать `aiuc compare BASELINE PROTECTED` в `src/aiuc_mini/cli.py`: требует совпадения `suite_hash`, печатает снижение доли успешных атак и долю ложных блокировок (SC-003, SC-004)
+- [X] T031 [P] [US3] Реализовать `GuardrailPolicy` и `GuardrailDecision` в `src/aiuc_mini/guardrails/policy.py`: `tool_allowlist`, `injection_patterns`, `output_redactions` — [data-model.md](data-model.md) §7
+- [X] T032 [P] [US3] Реализовать входной guardrail в `src/aiuc_mini/guardrails/input.py`: `@before_model` + `@hook_config(can_jump_to=["end"])`, при детекции инъекции возвращает `{"messages": [...], "jump_to": "end"}` — запрос не доходит до модели (FR-008). Пишет `guardrail_decision`
+- [X] T033 [P] [US3] Реализовать выходной guardrail в `src/aiuc_mini/guardrails/output.py`: `@after_model` — маскирование канарейки и PII в ответе (FR-009), `agent_response.redacted=true`
+- [X] T034 [US3] Реализовать политику инструментов в `src/aiuc_mini/guardrails/tools_policy.py`: `@wrap_tool_call` — при инструменте вне allow-list **не вызывать `handler`**, вернуть `ToolMessage("blocked")` (FR-010). Именно невызов handler делает запрет структурным, а не просьбой к модели
+- [X] T035 [US3] Подключить middleware в `target/agent.py` через `Config.guardrails_enabled`: тот же агент, тот же код-путь, разница — только список middleware (FR-011)
+- [X] T036 [P] [US3] Тесты в `tests/unit/test_guardrails.py`: инъекция блокируется до модели; секрет маскируется на выходе; запрещённый инструмент не исполняется (проверить, что tool-функция вообще не была вызвана); **каждое** решение, включая `allow`, попадает в trace
+- [X] T037 [P] [US3] Тест ложных срабатываний в `tests/integration/test_guardrail_false_positives.py`: benign-кейсы из suite не блокируются (FR-016, SC-004)
+- [X] T038 [US3] Реализовать `aiuc compare BASELINE PROTECTED` в `src/aiuc_mini/cli.py`: требует совпадения `suite_hash`, печатает снижение доли успешных атак и долю ложных блокировок (SC-003, SC-004)
 
 **Checkpoint**: `aiuc run --guardrails` на том же suite даёт заметно меньше успешных атак;
 `aiuc compare` показывает дельту. Связка «атака → защита» замкнута.

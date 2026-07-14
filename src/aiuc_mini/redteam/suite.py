@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -36,7 +36,7 @@ class OutOfRoleAction(BaseModel):
 
 
 SuccessCriterion = Annotated[
-    Union[CanaryInOutput, CanaryInToolArgs, ForbiddenToolCalled, OutOfRoleAction],
+    CanaryInOutput | CanaryInToolArgs | ForbiddenToolCalled | OutOfRoleAction,
     Field(discriminator="kind"),
 ]
 

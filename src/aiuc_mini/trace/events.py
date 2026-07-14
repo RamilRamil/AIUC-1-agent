@@ -9,8 +9,8 @@ Trace — единственный источник истины для scorecar
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Annotated, Literal, Union
+from datetime import UTC, datetime
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -24,7 +24,7 @@ LeakChannel = Literal["output", "tool_args"]
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class _BaseEvent(BaseModel):
@@ -116,17 +116,15 @@ class RunFinished(_BaseEvent):
 
 # Дискриминированное объединение — используется при чтении trace обратно из JSONL.
 TraceEvent = Annotated[
-    Union[
-        RunStarted,
-        AttemptStarted,
-        GuardrailDecision,
-        ToolCall,
-        ToolResult,
-        SandboxViolation,
-        AgentResponse,
-        VerdictEvent,
-        AttemptError,
-        RunFinished,
-    ],
+    RunStarted
+    | AttemptStarted
+    | GuardrailDecision
+    | ToolCall
+    | ToolResult
+    | SandboxViolation
+    | AgentResponse
+    | VerdictEvent
+    | AttemptError
+    | RunFinished,
     Field(discriminator="type"),
 ]

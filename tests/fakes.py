@@ -7,13 +7,22 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from typing import Any
 
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+)
 from langchain_core.outputs import ChatGeneration, ChatResult
+
+_CANARY_RE = re.compile(r"AIUC1-CANARY-\S+")
 
 
 class ScriptedChatModel(BaseChatModel):
@@ -51,13 +60,6 @@ def tool_call_message(name: str, args: dict, call_id: str = "call_1") -> AIMessa
         content="",
         tool_calls=[{"name": name, "args": args, "id": call_id, "type": "tool_call"}],
     )
-
-
-import re
-
-from langchain_core.messages import SystemMessage, ToolMessage
-
-_CANARY_RE = re.compile(r"AIUC1-CANARY-\S+")
 
 
 class CompromisableChatModel(BaseChatModel):
