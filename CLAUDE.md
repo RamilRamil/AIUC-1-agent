@@ -14,27 +14,34 @@
   Принцип II (песочница) — NON-NEGOTIABLE: никакого `subprocess`, никаких реальных сетевых
   вызовов, никаких файловых операций вне временного корня песочницы.
 
+- Всё окружение — **через Docker** (`docker compose run --rm test|gates|lint|aiuc`). На хост
+  ничего не ставим (ни `uv sync`, ни `pytest`).
+- Долгосрочная цель — постепенно покрыть все **53 контроля реального AIUC-1**; порядок и статусы
+  ведёт карта покрытия (фича 002).
+
 <!-- SPECKIT START -->
 
 ## Текущая фича
 
-**001-langchain-aiuc-mini** — план: [specs/001-langchain-aiuc-mini/plan.md](specs/001-langchain-aiuc-mini/plan.md)
+**002-aiuc-coverage-map** — план: [specs/002-aiuc-coverage-map/plan.md](specs/002-aiuc-coverage-map/plan.md)
 
-Стек: Python 3.11+, LangChain 1.3.x (`create_agent` + agent middleware), LangGraph 1.2.x,
-Pydantic 2, Typer, pytest. LLM — провайдер-агностичный `init_chat_model`, строка
-`provider:model` из `.env`; в тестах подменяется fake-моделью.
+Аналитический deliverable, НЕ реализация контролей. Единый машиночитаемый каталог
+`aiuc1/catalog.yaml` (53 контроля) → генератор строит `docs/aiuc1-coverage.md` (карта + бэклог) →
+валидатор-тесты под Docker. Статусы: `covered` / `technical_achievable` / `doc_only`; `partial` —
+модификатор для mixed, вне агрегации. Бэклог — тематические кластеры (будущие фичи 003+).
 
-Артефакты фазы планирования: [research.md](specs/001-langchain-aiuc-mini/research.md),
-[data-model.md](specs/001-langchain-aiuc-mini/data-model.md),
-[quickstart.md](specs/001-langchain-aiuc-mini/quickstart.md),
-[contracts/](specs/001-langchain-aiuc-mini/contracts/).
+Артефакты плана: [research.md](specs/002-aiuc-coverage-map/research.md) (классификация всех 53),
+[data-model.md](specs/002-aiuc-coverage-map/data-model.md),
+[contracts/catalog-schema.md](specs/002-aiuc-coverage-map/contracts/catalog-schema.md),
+[quickstart.md](specs/002-aiuc-coverage-map/quickstart.md).
 
-Три вещи, которые легко сломать по невнимательности:
-1. **Guardrail ≠ песочница.** Guardrail отключается флагом (`--no-guardrails`), и в этом режиме
-   мишень обязана быть уязвимой. Песочница не отключается никогда.
-2. **Судья — не LLM.** Вердикт атаки и статус контроля — чистые предикаты над trace
-   (канареечный секрет, факт вызова инструмента). Самооценка модели не используется.
-3. **Scorecard — чистая функция от trace.** Ни `ts`, ни абсолютных путей в агрегате, иначе
-   рушится воспроизводимость (SC-006).
+Ключевой инвариант честности (SC-004): `covered` нельзя проставить без ссылки на реально
+существующий контроль в `scorecard/controls.py` — это проверяет `tests/coverage/test_covered_grounded.py`.
+
+**Реализованная база (фича 001)** — стек Python 3.11+, LangChain 1.3.x (`create_agent` +
+middleware), LangGraph 1.2.x, Pydantic 2, Typer. Три вещи, которые легко сломать:
+1. **Guardrail ≠ песочница.** Guardrail отключается флагом; песочница — никогда.
+2. **Судья — не LLM.** Вердикт — чистые предикаты над trace.
+3. **Scorecard — чистая функция от trace.** Ни `ts`, ни абсолютных путей в агрегате (SC-006).
 
 <!-- SPECKIT END -->
