@@ -47,8 +47,9 @@ docker compose run --rm aiuc demo
 контролей пройдено:   7/12 → 11/12
 ```
 
-Отдельные команды: `aiuc run [--guardrails]`, `aiuc score <run_dir>`, `aiuc compare <a> <b>`
-(см. [contracts/cli.md](specs/001-langchain-aiuc-mini/contracts/cli.md)).
+Отдельные команды: `aiuc run [--guardrails]`, `aiuc score <run_dir>`, `aiuc compare <a> <b>`.
+
+📖 **Подробное руководство — как запускать и как читать результаты: [docs/GUIDE.md](docs/GUIDE.md).**
 
 ## Как это устроено (три вещи, которые легко перепутать)
 
