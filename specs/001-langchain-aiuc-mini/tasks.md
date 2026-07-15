@@ -136,14 +136,14 @@ US1 самодостаточна — уже даёт учебную ценнос
 pass/fail + обоснование, каждый провал ссылается на строку trace, а повторный `score` на том же
 trace даёт побайтово идентичный результат (SC-005, SC-006).
 
-- [ ] T039 [P] [US4] Реализовать модели `Control`, `ControlResult`, `Evidence`, `Scorecard`, `Summary` в `src/aiuc_mini/scorecard/models.py` — [data-model.md](data-model.md) §10–11
-- [ ] T040 [US4] Реализовать 12 контролей как чистые предикаты над trace в `src/aiuc_mini/scorecard/controls.py`: `SEC-01/02`, `PRIV-01/02`, `REL-01/02`, `SAF-01/02`, `ACC-01/02`, `SOC-01/02` — по таблице [research.md](research.md) R9. Инвариант: `status=fail` **обязан** нести непустой `evidence` (FR-013)
-- [ ] T041 [US4] 🔒 Реализовать **чистую** агрегацию в `src/aiuc_mini/scorecard/aggregate.py`: `aggregate(events) -> Scorecard`. Никаких `ts`, абсолютных путей и зависящего от хеш-таблиц порядка; контроли сортируются по `id`; все 6 пиллеров присутствуют всегда (FR-012, FR-014). Считает `attack_success_rate`, `false_block_rate`, `errors`
-- [ ] T042 🔒 [P] [US4] Гейт детерминизма: `tests/determinism/test_scorecard_pure.py` — `aggregate(events) == aggregate(events)` побайтово на зафиксированном trace-фикстуре; отчёт не содержит timestamp'ов и абсолютных путей (SC-006)
-- [ ] T043 [P] [US4] Реализовать рендер в `src/aiuc_mini/scorecard/render.py`: `scorecard.json` (машиночитаемый) и `scorecard.md` (таблица по 6 пиллерам, evidence как `trace.jsonl:<line>`)
-- [ ] T044 [P] [US4] Тест в `tests/unit/test_controls_evidence.py`: каждый `fail` несёт evidence с валидным `attempt_id` и `trace_line`, указывающим на реально существующую строку trace (FR-013)
-- [ ] T045 [US4] Реализовать `aiuc score RUN_DIR [--format md|json|both]` в `src/aiuc_mini/cli.py`. LLM не вызывается; exit code не зависит от числа проваленных контролей
-- [ ] T046 [US4] Реализовать `aiuc demo` в `src/aiuc_mini/cli.py`: прогон без защиты → прогон с защитой → два scorecard'а → сравнение, одной командой (SC-001)
+- [X] T039 [P] [US4] Реализовать модели `Control`, `ControlResult`, `Evidence`, `Scorecard`, `Summary` в `src/aiuc_mini/scorecard/models.py` — [data-model.md](data-model.md) §10–11
+- [X] T040 [US4] Реализовать 12 контролей как чистые предикаты над trace в `src/aiuc_mini/scorecard/controls.py`: `SEC-01/02`, `PRIV-01/02`, `REL-01/02`, `SAF-01/02`, `ACC-01/02`, `SOC-01/02` — по таблице [research.md](research.md) R9. Инвариант: `status=fail` **обязан** нести непустой `evidence` (FR-013)
+- [X] T041 [US4] 🔒 Реализовать **чистую** агрегацию в `src/aiuc_mini/scorecard/aggregate.py`: `aggregate(events) -> Scorecard`. Никаких `ts`, абсолютных путей и зависящего от хеш-таблиц порядка; контроли сортируются по `id`; все 6 пиллеров присутствуют всегда (FR-012, FR-014). Считает `attack_success_rate`, `false_block_rate`, `errors`
+- [X] T042 🔒 [P] [US4] Гейт детерминизма: `tests/determinism/test_scorecard_pure.py` — `aggregate(events) == aggregate(events)` побайтово на зафиксированном trace-фикстуре; отчёт не содержит timestamp'ов и абсолютных путей (SC-006)
+- [X] T043 [P] [US4] Реализовать рендер в `src/aiuc_mini/scorecard/render.py`: `scorecard.json` (машиночитаемый) и `scorecard.md` (таблица по 6 пиллерам, evidence как `trace.jsonl:<line>`)
+- [X] T044 [P] [US4] Тест в `tests/unit/test_controls_evidence.py`: каждый `fail` несёт evidence с валидным `attempt_id` и `trace_line`, указывающим на реально существующую строку trace (FR-013)
+- [X] T045 [US4] Реализовать `aiuc score RUN_DIR [--format md|json|both]` в `src/aiuc_mini/cli.py`. LLM не вызывается; exit code не зависит от числа проваленных контролей
+- [X] T046 [US4] Реализовать `aiuc demo` в `src/aiuc_mini/cli.py`: прогон без защиты → прогон с защитой → два scorecard'а → сравнение, одной командой (SC-001)
 
 **Checkpoint**: `aiuc demo` проходит полный цикл и печатает сравнение. Все 4 user stories готовы.
 
@@ -151,11 +151,11 @@ trace даёт побайтово идентичный результат (SC-00
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T047 [P] E2E-тест в `tests/integration/test_demo_e2e.py` на `FakeListChatModel`: `demo` отрабатывает без ключей API, оба прогона и оба scorecard'а созданы
-- [ ] T048 [P] Тест SC-007 в `tests/isolation/test_no_host_effects.py`: полный прогон не создаёт и не меняет ничего вне `runs/` и tmp-песочницы (снимок ФС до/после)
-- [ ] T049 [P] Заполнить `README.md`: как запустить демо, что означают цифры в scorecard, ссылка на quickstart
-- [ ] T050 [P] Прогнать `ruff check` + `ruff format`, починить замечания
-- [ ] T051 Сверить реализацию с [quickstart.md](quickstart.md): все команды из него работают как описано; при расхождении править **quickstart, а не память** (Принцип VI)
+- [X] T047 [P] E2E-тест в `tests/integration/test_demo_e2e.py` на `FakeListChatModel`: `demo` отрабатывает без ключей API, оба прогона и оба scorecard'а созданы
+- [X] T048 [P] Тест SC-007 в `tests/isolation/test_no_host_effects.py`: полный прогон не создаёт и не меняет ничего вне `runs/` и tmp-песочницы (снимок ФС до/после)
+- [X] T049 [P] Заполнить `README.md`: как запустить демо, что означают цифры в scorecard, ссылка на quickstart
+- [X] T050 [P] Прогнать `ruff check` + `ruff format`, починить замечания
+- [X] T051 Сверить реализацию с [quickstart.md](quickstart.md): все команды из него работают как описано; при расхождении править **quickstart, а не память** (Принцип VI)
 
 ---
 

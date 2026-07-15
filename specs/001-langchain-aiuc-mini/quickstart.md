@@ -4,14 +4,14 @@
 
 Цель: за один вечер увидеть полный цикл **атака → защита → аудит** (SC-001).
 
-> ⚠️ Это описание целевого состояния после `/speckit-implement`. Кода пока нет.
+> Стенд реализован. Все команды идут через Docker — на хост ничего ставить не нужно.
 
 ---
 
 ## 1. Установка
 
 ```bash
-uv sync --extra anthropic     # или --extra openai / --extra ollama
+docker compose build          # окружение целиком в контейнере (uv внутри)
 cp .env.example .env
 ```
 
@@ -31,7 +31,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ## 2. Демонстрация одной командой
 
 ```bash
-uv run aiuc demo
+docker compose run --rm aiuc demo
 ```
 
 Прогоняет набор атак дважды — без guardrail и с ним — строит оба scorecard'а и печатает
@@ -53,7 +53,7 @@ uv run aiuc demo
 ### Шаг 1 — уязвимая мишень (User Story 1)
 
 ```bash
-uv run aiuc run --no-guardrails
+docker compose run --rm aiuc run --no-guardrails
 ```
 
 Мишень — агент с системным промптом, ролью, границами и **канареечным секретом**
@@ -88,7 +88,7 @@ jq -c 'select(.type=="tool_call" or .type=="verdict")' runs/<id>/trace.jsonl
 ### Шаг 3 — guardrail (User Story 3)
 
 ```bash
-uv run aiuc run --guardrails
+docker compose run --rm aiuc run --guardrails
 ```
 
 Три middleware LangChain:
@@ -107,7 +107,7 @@ uv run aiuc run --guardrails
 ### Шаг 4 — аудит (User Story 4)
 
 ```bash
-uv run aiuc score runs/<id>
+docker compose run --rm aiuc score runs/<id>
 ```
 
 Scorecard по 6 пиллерам AIUC-1, 12 учебных контролей. Каждый провал ссылается на конкретную
@@ -129,7 +129,7 @@ Scorecard по 6 пиллерам AIUC-1, 12 учебных контролей. 
 ## 4. Сравнение прогонов
 
 ```bash
-uv run aiuc compare runs/<baseline> runs/<protected>
+docker compose run --rm aiuc compare runs/<baseline> runs/<protected>
 ```
 
 Требует одинаковый `suite_hash` у обоих прогонов — сравнивать результаты на разных наборах атак
@@ -140,13 +140,12 @@ uv run aiuc compare runs/<baseline> runs/<protected>
 ## 5. Проверка гейтов конституции
 
 ```bash
-uv run pytest tests/isolation/     # Принцип II: побег из песочницы невозможен
-uv run pytest tests/determinism/   # Принцип IV: scorecard воспроизводим
-uv run pytest                      # всё, на фиктивной LLM — без ключей и без затрат
+docker compose run --rm gates      # Принципы II и IV: изоляция + детерминизм
+docker compose run --rm test       # всё, на fake-модели — без ключей и без затрат
 ```
 
-Полный `pytest` не требует API-ключа: модель инжектится параметром и в тестах подменяется
-`FakeListChatModel`.
+Полный прогон тестов не требует API-ключа: модель инжектится параметром и в тестах
+подменяется fake-моделью (`tests/fakes.py`).
 
 ---
 
