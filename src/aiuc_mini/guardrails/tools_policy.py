@@ -13,41 +13,72 @@ from typing import Any
 from langchain.agents.middleware import AgentMiddleware
 from langchain_core.messages import ToolMessage
 
-from ..trace.events import GuardrailDecision
+from ..trace.events import GuardrailDecision, ToolCall
 from ..trace.sink import TraceSink
 from .policy import GuardrailPolicy
 
 
 class ToolPolicyGuardrail(AgentMiddleware):
-    def __init__(self, policy: GuardrailPolicy, sink: TraceSink) -> None:
+    def __init__(self, policy: GuardrailPolicy, sink: TraceSink, secret: str = "") -> None:
         super().__init__()
         self._policy = policy
         self._sink = sink
+        self._secret = secret
 
     def _decide(self, request: Any) -> ToolMessage | None:
         """Решение политики. ``None`` — пропустить к handler; ``ToolMessage`` — заблокировать.
 
         Общее для sync- и async-путей, чтобы политика не разъехалась между ними.
+
+        Порядок правил (data-model §2): сначала allow-list (разрешён ли инструмент вообще), затем
+        секрет в аргументах — так причина блокировки в trace однозначна.
         """
         call = request.tool_call
         name = call["name"]
-        if self._policy.tool_allowed(name):
-            self._sink.emit(
-                GuardrailDecision(stage="tool_call", action="allow", rule_id="TOOL-ALLOW")
+
+        # 1) Инструмент вне роли — блокируем независимо от аргументов.
+        if not self._policy.tool_allowed(name):
+            self._block(name, call, "TOOL-ALLOWLIST", f"tool not in allowlist: {name}")
+            return ToolMessage(
+                content=f"Инструмент {name} заблокирован политикой.",
+                tool_call_id=call["id"],
             )
-            return None
+
+        # 2) Секрет в аргументах — блокируем вызов (фича 004, FR-001).
+        #
+        # Именно блокировка, а не маскирование аргумента: замаскировав, мы бы всё равно отправили
+        # запрос на адрес атакующего — тихий полу-успех. Невызов handler делает запрет структурным.
+        if self._policy.block_secret_in_tool_args and self._policy.secret_in_args(
+            call.get("args"), self._secret
+        ):
+            self._block(name, call, "TOOL-SECRET", f"secret in arguments of {name}")
+            return ToolMessage(
+                content=f"Вызов {name} заблокирован: в аргументах обнаружен секрет.",
+                tool_call_id=call["id"],
+            )
 
         self._sink.emit(
+            GuardrailDecision(stage="tool_call", action="allow", rule_id="TOOL-ALLOW")
+        )
+        return None
+
+    def _block(self, name: str, call: dict, rule_id: str, reason: str) -> None:
+        """Записать решение о блокировке И сам факт попытки вызова (Принцип V).
+
+        Заблокированный инструмент не исполняется, поэтому событие ``tool_call`` из
+        ``target/tools.py`` не появится — без этой записи в trace не было бы видно, ЧТО именно
+        пытались сделать. Секрет в ``args`` маскируется writer'ом при записи.
+
+        Важно: ``blocked=True`` обязателен — судья игнорирует заблокированные вызовы при проверке
+        эксфильтрации, иначе сама запись о пресечённой попытке засчиталась бы как успех атаки.
+        """
+        self._sink.emit(
             GuardrailDecision(
-                stage="tool_call",
-                action="block",
-                rule_id="TOOL-ALLOWLIST",
-                reason=f"tool not in allowlist: {name}",
+                stage="tool_call", action="block", rule_id=rule_id, reason=reason
             )
         )
-        return ToolMessage(
-            content=f"Инструмент {name} заблокирован политикой.",
-            tool_call_id=call["id"],
+        self._sink.emit(
+            ToolCall(tool=name, args=dict(call.get("args") or {}), blocked=True)
         )
 
     def wrap_tool_call(self, request: Any, handler: Callable[[Any], Any]) -> Any:

@@ -22,6 +22,8 @@ def build_guardrail_middleware(
     policy = policy or GuardrailPolicy()
     return [
         InputGuardrail(policy, sink),
-        ToolPolicyGuardrail(policy, sink),
-        OutputGuardrail(secret, sink),
+        # Секрет нужен tool-policy, чтобы блокировать эксфильтрацию через аргументы (фича 004):
+        # раньше его получал только OutputGuardrail, и аргументы вызовов никто не смотрел.
+        ToolPolicyGuardrail(policy, sink, secret=secret),
+        OutputGuardrail(secret, sink, policy=policy),
     ]

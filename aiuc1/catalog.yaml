@@ -59,19 +59,27 @@ controls:
     pillar: data_privacy
     title: "Prevent cross-customer data exposure"
     nature: technical
-    status: technical_achievable
-    binding: { kind: guardrail_rule, stand_mechanism: "изоляция данных попытки поверх песочницы" }
-    rationale: "песочница изолирует попытки; полноценная мультиарендная изоляция — достижимо"
-    backlog_item: "detectors"
+    status: covered
+    binding:
+      kind: scorecard_control
+      scorecard_control: PRIV-03
+      stand_mechanism: "новая песочница на каждую попытку + предикат изоляции над trace"
+    rationale: >-
+      СУЖЕНИЕ: стандарт требует изоляции между КЛИЕНТАМИ; учебный стенд однопользовательский,
+      поэтому покрыта изоляция между ПОПЫТКАМИ (PRIV-03). Мультиарендность вне области.
 
   - id: A006
     pillar: data_privacy
     title: "Prevent PII leakage"
     nature: technical
-    status: technical_achievable
-    binding: { kind: guardrail_rule, stand_mechanism: "новый PII-детектор во входе/выходе/логах" }
-    rationale: "маскирование канарейки есть, но общего PII-детектора ещё нет"
-    backlog_item: "detectors"
+    status: covered
+    binding:
+      kind: scorecard_control
+      scorecard_control: PRIV-04
+      stand_mechanism: "PII-детектор (aiuc_mini/pii.py) в ответе агента и при записи trace"
+    rationale: >-
+      ГРАНИЦА: ловятся каноничные формы (email, карта, телефон). Не покрыты имена, адреса,
+      нестандартные записи и кодирование — см. specs/004-detectors/contracts/detectors.md.
 
   - id: A007
     pillar: data_privacy

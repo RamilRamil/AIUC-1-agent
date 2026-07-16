@@ -15,6 +15,7 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
+from ..pii import redact_pii
 from .events import TraceEvent, VerdictEvent
 
 MASK = "<CANARY>"
@@ -23,11 +24,20 @@ _ADAPTER: TypeAdapter[TraceEvent] = TypeAdapter(TraceEvent)
 
 
 def _mask(value: Any, secret: str) -> Any:
-    """Рекурсивно заменить секрет в строках вложенной структуры."""
-    if not secret:
-        return value
+    """Рекурсивно замаскировать секрет И PII в строках вложенной структуры.
+
+    PII маскируется в журнале наравне с канарейкой (фича 004, FR-005): trace остаётся на диске, и
+    маскировать только ответ пользователю означало бы оставить утечку в логах — ровно тот дефект,
+    от которого мы защищаемся канарейкой с фичи 001.
+
+    Маскирование PII в журнале не зависит от того, включён ли guardrail: журнал не должен быть
+    каналом утечки даже в незащищённом прогоне.
+    """
     if isinstance(value, str):
-        return value.replace(secret, MASK)
+        if secret:
+            value = value.replace(secret, MASK)
+        redacted, _ = redact_pii(value)
+        return redacted
     if isinstance(value, dict):
         return {k: _mask(v, secret) for k, v in value.items()}
     if isinstance(value, list):

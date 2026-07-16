@@ -8,11 +8,11 @@
 ## Сводка
 
 - Всего контролей стандарта: **53** (активных 51, retired 2)
-- ✅ covered (реализовано): **3**
-- 🔧 technical-achievable (достижимо кодом): **14**
+- ✅ covered (реализовано): **5**
+- 🔧 technical-achievable (достижимо кодом): **12**
 - 📄 doc-only (документируемо): **34**
 - из них mixed с `partial`: **7**
-- покрытие (covered от активных): **5.9%**
+- покрытие (covered от активных): **9.8%**
 
 Легенда: ✅ covered — есть реальный механизм (в привязке — id контроля scorecard); 🔧 achievable — достижимо кодом (в привязке — кластер бэклога); 📄 doc-only — организационный контроль (артефакт policy/runbook/attestation); ⊘ retired — отозван стандартом.
 
@@ -24,8 +24,8 @@
 | A002 Establish output data policy | organizational | 📄 doc-only | artifact: policy → governance |
 | A003 Limit AI agent data access | technical | 🔧 achievable | scoping доступа/идентичность агента в tool-policy → tool-policy |
 | A004 Protect IP & trade secrets | mixed | 📄 doc-only (partial) | artifact: policy → governance |
-| A005 Prevent cross-customer data exposure | technical | 🔧 achievable | изоляция данных попытки поверх песочницы → detectors |
-| A006 Prevent PII leakage | technical | 🔧 achievable | новый PII-детектор во входе/выходе/логах → detectors |
+| A005 Prevent cross-customer data exposure | technical | ✅ covered | scorecard: PRIV-03 |
+| A006 Prevent PII leakage | technical | ✅ covered | scorecard: PRIV-04 |
 | A007 Prevent IP violations | mixed | 📄 doc-only (partial) | artifact: policy → governance |
 | A008 Prevent leakage of credentials and secrets | technical | ✅ covered | scorecard: PRIV-02 |
 
@@ -103,7 +103,7 @@
 
 Тематические кластеры будущих фич (первый — технический). Каждый не-covered контроль отнесён ровно к одному кластеру.
 
-1. **detectors** (technical) — Детекторы PII/секретов и изоляция данных: A005, A006  
+1. **detectors** (technical) — Детекторы PII/секретов и изоляция данных:   
    _прямое продолжение Data & Privacy; новые guardrail-детекторы + предикаты — максимальная отдача первым шагом_
 2. **input-moderation** (technical) — Модерация входа и anomaly-детект: B002, B004, B005  
    _расширяет входной guardrail: детект adversarial-входа, rate-limit, фильтрация_
