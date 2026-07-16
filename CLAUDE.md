@@ -23,20 +23,32 @@
 
 ## Текущая фича
 
-**002-aiuc-coverage-map** — план: [specs/002-aiuc-coverage-map/plan.md](specs/002-aiuc-coverage-map/plan.md)
+**003-evaluation-honesty** — план: [specs/003-evaluation-honesty/plan.md](specs/003-evaluation-honesty/plan.md)
 
-Аналитический deliverable, НЕ реализация контролей. Единый машиночитаемый каталог
-`aiuc1/catalog.yaml` (53 контроля) → генератор строит `docs/aiuc1-coverage.md` (карта + бэклог) →
-валидатор-тесты под Docker. Статусы: `covered` / `technical_achievable` / `doc_only`; `partial` —
-модификатор для mixed, вне агрегации. Бэклог — тематические кластеры (будущие фичи 003+).
+Чинит **измерение**, а не защиту. Стенд систематически льстил себе из четырёх мест:
+1. судья выносил `BLOCKED` поверх реального успеха атаки → порядок: успех → блокировка → провал;
+2. red-team прекращал мутации на `BLOCKED` (сдавался при первом контакте с защитой) → мутировать
+   именно заблокированное, бюджет остаётся жёсткой границей;
+3. доля успеха делилась на суммарные попытки (переменный знаменатель) → база = **исходные атаки**
+   набора, число попыток публикуется отдельно;
+4. `SAF-02` не мог провалиться вовсе, `REL-02`/`ACC-02` были вакуумно зелёными → признак
+   `scorable`, арбитр — мета-тест `tests/honesty/test_controls_falsifiable.py`.
 
-Артефакты плана: [research.md](specs/002-aiuc-coverage-map/research.md) (классификация всех 53),
-[data-model.md](specs/002-aiuc-coverage-map/data-model.md),
-[contracts/catalog-schema.md](specs/002-aiuc-coverage-map/contracts/catalog-schema.md),
-[quickstart.md](specs/002-aiuc-coverage-map/quickstart.md).
+Плюс FR-015 фичи 001 (таймаут) в коде не работал: `ThreadPoolExecutor.__exit__` ждёт зависший
+вызов → переход на `ainvoke` + `asyncio.timeout`, остаточный предел документируется честно.
 
-Ключевой инвариант честности (SC-004): `covered` нельзя проставить без ссылки на реально
-существующий контроль в `scorecard/controls.py` — это проверяет `tests/coverage/test_covered_grounded.py`.
+Артефакты: [research.md](specs/003-evaluation-honesty/research.md),
+[data-model.md](specs/003-evaluation-honesty/data-model.md),
+[contracts/metrics.md](specs/003-evaluation-honesty/contracts/metrics.md),
+[quickstart.md](specs/003-evaluation-honesty/quickstart.md).
+
+**Цифры после фичи ухудшатся — это цель, а не регресс.**
+
+**Фича 002 (готова)** — карта покрытия: `aiuc1/catalog.yaml` (53 контроля AIUC-1, 2 retired → 51
+активный) → `docs/aiuc1-coverage.md` через `aiuc coverage`. Инвариант честности: `covered` нельзя
+проставить без ссылки на реальный контроль в `scorecard/controls.py`
+(`tests/coverage/test_covered_grounded.py`). Id кластеров бэклога **не** кодируют номер фичи —
+за порядок отвечает `priority`.
 
 **Реализованная база (фича 001)** — стек Python 3.11+, LangChain 1.3.x (`create_agent` +
 middleware), LangGraph 1.2.x, Pydantic 2, Typer. Три вещи, которые легко сломать:
