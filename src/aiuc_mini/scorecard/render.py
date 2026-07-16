@@ -11,6 +11,7 @@ from pathlib import Path
 
 from ..trace.writer import read_trace
 from .aggregate import aggregate
+from .compare import EVALUATION_CAVEAT
 from .models import PILLAR_ORDER, PILLAR_TITLES, Scorecard
 
 
@@ -20,16 +21,29 @@ def to_json(card: Scorecard) -> str:
 
 def to_markdown(card: Scorecard) -> str:
     mode = "с защитой" if card.guardrails_enabled else "без защиты"
+    s = card.summary
+    informational = [
+        c.id for results in card.pillars.values() for c in results if not c.scorable
+    ]
     lines = [
         f"# Scorecard AIUC-1 — прогон `{card.run_id}` ({mode})",
         "",
         f"- suite_hash: `{card.suite_hash}`",
-        f"- контролей пройдено: **{card.summary.controls_passed}/{card.summary.controls_total}**",
-        f"- доля успешных атак: **{card.summary.attack_success_rate:.0%}**",
-        f"- ложные блокировки: **{card.summary.false_block_rate:.0%}**",
-        f"- ошибок попыток: {card.summary.errors}",
-        "",
+        f"- контролей пройдено: **{s.controls_passed}/{s.controls_total}**",
+        # База показателей — атаки, а не попытки (FR-005); попытки — контекст усилий (FR-006).
+        f"- база атак: **{s.attack_base_total}** исходных; пробили: "
+        f"**{s.attacks_breached}/{s.attack_base_total}**",
+        f"- доля успешных атак: **{s.attack_success_rate:.0%}**",
+        f"- попыток сделано: {s.attempts_total} (включая мутации; в знаменатель не входят)",
+        f"- ложные блокировки: **{s.false_block_rate:.0%}**",
+        f"- ошибок попыток: {s.errors}",
     ]
+    if informational:
+        lines.append(
+            f"- информационные (вне счёта): {', '.join(sorted(informational))}"
+        )
+    lines.append("")
+
     for pillar in PILLAR_ORDER:
         lines.append(f"## {PILLAR_TITLES[pillar]}")
         lines.append("")
@@ -37,12 +51,21 @@ def to_markdown(card: Scorecard) -> str:
         lines.append("|---|---|---|")
         for c in card.pillars[pillar]:
             mark = "✅ pass" if c.status == "pass" else "❌ fail"
+            if not c.scorable:
+                mark += " ⓘ"
             rationale = c.rationale
             if c.status == "fail" and c.evidence:
                 refs = ", ".join(f"trace.jsonl:{e.trace_line}" for e in c.evidence)
                 rationale = f"{rationale} ({refs})"
             lines.append(f"| {c.id} {c.title} | {mark} | {rationale} |")
         lines.append("")
+
+    lines.append("---")
+    lines.append("")
+    lines.append("ⓘ — информационный контроль: показывается, но очка в счёт не даёт.")
+    lines.append("")
+    lines.append(EVALUATION_CAVEAT)
+    lines.append("")
     return "\n".join(lines)
 
 

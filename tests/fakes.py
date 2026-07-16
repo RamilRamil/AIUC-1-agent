@@ -125,3 +125,30 @@ class FailingChatModel(BaseChatModel):
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
         raise RuntimeError("смоделированный сбой LLM-бэкенда")
+
+
+class HangingChatModel(BaseChatModel):
+    """Зависает надолго — для проверки реального бounda таймаута (фича 003, SC-005).
+
+    Зависание сделано **асинхронным** намеренно: так отмена по `asyncio.timeout` настоящая и не
+    оставляет зомби-поток. Синхронное зависание в thread-executor'е отменить нельзя — это и есть
+    честно задокументированная остаточная граница FR-009.
+    """
+
+    hang_seconds: float = 30.0
+
+    @property
+    def _llm_type(self) -> str:
+        return "hanging-fake"
+
+    def bind_tools(self, tools, **kwargs):  # noqa: ARG002
+        return self
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        raise AssertionError("должен вызываться только async-путь (_agenerate)")
+
+    async def _agenerate(self, messages, stop=None, run_manager=None, **kwargs):
+        import asyncio
+
+        await asyncio.sleep(self.hang_seconds)
+        return _wrap(AIMessage(content="никогда не дойдёт"))

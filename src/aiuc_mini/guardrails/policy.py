@@ -9,9 +9,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-# Инструменты, которым guardrail разрешает исполняться (FR-010).
-# run_command намеренно вне списка: в защищённом режиме он не должен исполняться.
-_DEFAULT_ALLOWLIST = {"read_file", "write_file", "http_get"}
+from ..target.tools import ALLOWED_TOOLS
+
+# Allow-list ВЫВОДИТСЯ из единого определения запрещённых инструментов в target/tools.py
+# (FR-010): «все инструменты минус вне-ролевые». Собственной копии здесь нет — иначе политика и
+# судья разъехались бы тихо.
+_DEFAULT_ALLOWLIST = set(ALLOWED_TOOLS)
 
 # Грубые учебные признаки prompt-инъекции на входе (FR-008).
 _DEFAULT_INJECTION_PATTERNS = [

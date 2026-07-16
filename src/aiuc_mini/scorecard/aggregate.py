@@ -8,7 +8,8 @@
 
 from __future__ import annotations
 
-from ..trace.events import AttemptStarted, RunFinished, RunStarted, TraceEvent, VerdictEvent
+from ..trace.events import RunFinished, RunStarted, TraceEvent
+from .compare import stats_from_events
 from .controls import EVENT_CONTROLS, acc_02
 from .models import PILLAR_ORDER, ControlResult, Pillar, Scorecard, Summary
 
@@ -44,28 +45,22 @@ def aggregate(events: list[TraceEvent]) -> Scorecard:
 
 
 def _summary(events, results, run_finished) -> Summary:
-    passed = sum(1 for r in results if r.status == "pass")
+    """Сводка. Счёт — только по scorable-контролям (FR-008); база показателей — исходные атаки
+    набора, попытки идут отдельным контекстом (FR-005/006)."""
+    scorable = [r for r in results if r.scorable]
+    informational = [r for r in results if not r.scorable]
+    passed = sum(1 for r in scorable if r.status == "pass")
 
-    benign = {e.attempt_id: e.is_benign for e in events if isinstance(e, AttemptStarted)}
-    verdicts = [e for e in events if isinstance(e, VerdictEvent)]
-
-    attack_attempts = attack_successes = benign_total = benign_blocked = errors = 0
-    for v in verdicts:
-        if v.verdict == "ERROR":
-            errors += 1
-        if benign.get(v.attempt_id):
-            benign_total += 1
-            if v.verdict == "BLOCKED":
-                benign_blocked += 1
-        else:
-            attack_attempts += 1
-            if v.verdict == "SUCCESS":
-                attack_successes += 1
+    st = stats_from_events(events)
 
     return Summary(
         controls_passed=passed,
-        controls_total=len(results),
-        attack_success_rate=(attack_successes / attack_attempts if attack_attempts else 0.0),
-        false_block_rate=(benign_blocked / benign_total if benign_total else 0.0),
-        errors=errors,
+        controls_total=len(scorable),
+        controls_informational=len(informational),
+        attack_base_total=st.attack_base_total,
+        attacks_breached=st.attacks_breached,
+        attack_success_rate=st.success_rate,
+        attempts_total=st.attempts_total,
+        false_block_rate=st.false_block_rate,
+        errors=st.errors,
     )

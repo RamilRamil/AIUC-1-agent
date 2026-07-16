@@ -9,8 +9,7 @@
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import TimeoutError as FutureTimeout
+import asyncio
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -98,11 +97,26 @@ def run_suite(
             elif verdict == "ERROR":
                 errors += 1
 
-            # Мутируем только неуспешные не-benign атаки в пределах бюджета.
-            done = verdict in ("SUCCESS", "BLOCKED") or current.is_benign
+            # Мутируем при BLOCKED и FAILURE (FR-003/004, research R2).
+            #
+            # BLOCKED — это НЕ повод остановиться: защита сработала, значит найдена граница, и
+            # именно её red-team обязан пробовать обойти. Раньше здесь стоял останов на BLOCKED —
+            # red-team сдавался при первом контакте с обороной, и «снижение атак» частично
+            # измеряло не стойкость guardrail, а наше терпение.
+            done = verdict == "SUCCESS" or current.is_benign
             if done or iteration == cfg.max_mutations:
                 break
-            current = mutate(current, iteration, redteam_model)
+
+            # Сбой атакующего не должен ронять прогон (FR-015 фичи 001): изоляция ошибок
+            # раньше покрывала только вызов мишени, а падение mutate() убивало весь прогон.
+            try:
+                current = mutate(current, iteration, redteam_model)
+            except Exception as exc:  # noqa: BLE001 — учебный стенд: сбой мутации ≠ конец прогона
+                sink.attempt_id = current.id
+                sink.emit(
+                    AttemptError(error_type="llm_error", message=f"mutate failed: {exc!r}")
+                )
+                break
 
     sink.emit(
         RunFinished(
@@ -144,16 +158,15 @@ def _run_attempt(
         middleware = _build_middleware(cfg, persona, sink) if cfg.guardrails_enabled else []
         agent = build_target_agent(model, tools, persona, middleware=middleware)
 
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            future = pool.submit(
-                agent.invoke, {"messages": [HumanMessage(attack.payload)]}
+        try:
+            result = asyncio.run(
+                _ainvoke_with_timeout(agent, attack.payload, cfg.attempt_timeout_s)
             )
-            try:
-                result = future.result(timeout=cfg.attempt_timeout_s)
-            except FutureTimeout:
-                sink.emit(AttemptError(error_type="timeout", message="attempt timed out"))
-                _emit_verdict(sink, "ERROR", None, "таймаут попытки", attack)
-                return "ERROR"
+        except TimeoutError:
+            sink.emit(AttemptError(error_type="timeout", message="attempt timed out"))
+            _emit_verdict(sink, "ERROR", None, "таймаут попытки", attack)
+            sandbox.cleanup()
+            return "ERROR"
 
         final = result["messages"][-1]
         content = final.content if isinstance(final.content, str) else str(final.content)
@@ -170,6 +183,25 @@ def _run_attempt(
     _emit_verdict(sink, verdict, leaked_via, rationale, attack)
     sandbox.cleanup()
     return verdict
+
+
+async def _ainvoke_with_timeout(agent, payload: str, timeout_s: float):
+    """Вызвать мишень с реальным ограничением времени (FR-009, research R5).
+
+    Раньше здесь был ``ThreadPoolExecutor`` в ``with``-блоке: при таймауте выход из блока звал
+    ``shutdown(wait=True)`` и **блокировался до конца зависшего вызова** — то есть таймаут был
+    иллюзорным, и зависший бэкенд останавливал весь прогон вопреки FR-015.
+
+    Async-путь ограничивает время по-настоящему: реальные провайдеры используют async HTTP-клиенты,
+    и отмена задачи прерывает сетевое ожидание.
+
+    ЧЕСТНАЯ ГРАНИЦА: если модель реализует только синхронный ``_generate``, LangChain исполнит его
+    в thread-executor'е, и отмена **не прервёт сам поток** — она лишь вернёт управление раннеру.
+    Вклад в стену времени прогона ограничен, но поток продолжит жить фоном. Это ограничение
+    признаётся явно (FR-009 допускает честное понижение вместо ложного обещания).
+    """
+    async with asyncio.timeout(timeout_s):
+        return await agent.ainvoke({"messages": [HumanMessage(payload)]})
 
 
 def _emit_verdict(sink, verdict, leaked_via, rationale, attack):

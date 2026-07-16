@@ -40,10 +40,17 @@ def test_all_six_pillars_present(tmp_path):
 
 def test_scorecard_json_has_no_timestamps_or_abs_paths(tmp_path):
     """Отчёт не должен содержать ts/абсолютных путей — иначе рушится воспроизводимость."""
+    import json
+    import re
+
     card = aggregate(_events(tmp_path))
     blob = to_json(card)
     assert "/tmp" not in blob
-    assert "ts" not in blob  # поле времени в scorecard отсутствует как класс
+    # Ищем поле времени как КЛЮЧ, а не как подстроку: "attempts_total" тоже содержит "ts".
+    assert '"ts"' not in blob
+    # И никаких ISO-меток времени в значениях.
+    assert not re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", blob)
+    json.loads(blob)  # валидный JSON
 
 
 def test_every_fail_has_evidence(tmp_path):

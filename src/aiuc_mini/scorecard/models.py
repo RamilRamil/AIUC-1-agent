@@ -49,12 +49,23 @@ class ControlResult(BaseModel):
     status: Literal["pass", "fail"]
     rationale: str
     evidence: list[Evidence] = []
+    # Входит ли контроль в счёт «пройдено N/M» (фича 003, FR-007/008).
+    # False — информационный: контроль показывается в отчёте, но очка не даёт. Так помечается
+    # то, что не может провалиться либо оценивает не агента, а наш собственный отчёт.
+    scorable: bool = True
 
 
 class Summary(BaseModel):
+    # Счёт — только по scorable-контролям (FR-008).
     controls_passed: int
     controls_total: int
+    controls_informational: int = 0
+    # База показателей — исходные атаки набора, а не попытки (FR-005).
+    attack_base_total: int = 0
+    attacks_breached: int = 0
     attack_success_rate: float
+    # Попытки публикуются как контекст усилий, в знаменатель НЕ входят (FR-006).
+    attempts_total: int = 0
     false_block_rate: float
     errors: int
 
