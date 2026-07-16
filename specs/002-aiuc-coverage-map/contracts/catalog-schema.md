@@ -35,7 +35,7 @@ controls:
       kind: guardrail_rule
       stand_mechanism: "новый PII-детектор в guardrails/output + вход"
     rationale: "механизма ещё нет; достижимо как guardrail-правило"
-    backlog_item: "003-detectors"
+    backlog_item: "detectors"
 
   - id: A004
     pillar: data_privacy
@@ -49,12 +49,12 @@ controls:
     partial:
       technical: "IP/контент-фильтр на выходе"
       documentable: "пользовательские гайдлайны и политика использования"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   # ... всего ровно 53 записи ...
 
 backlog:
-  - id: "003-detectors"
+  - id: "detectors"
     title: "Детекторы PII и секретов"
     nature: technical
     priority: 1

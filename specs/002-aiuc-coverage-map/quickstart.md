@@ -38,13 +38,13 @@ AIUC-1 coverage (version 1.0.0)
 
 ```markdown
 | A008 Детект секретов | technical | ✅ covered | PRIV-02 + маскирование trace |
-| A006 PII-детект | technical | 🔧 achievable | → 003-detectors |
+| A006 PII-детект | technical | 🔧 achievable | → detectors |
 | A004 IP-фильтр + гайдлайны | mixed | 📄 doc-only (partial) | policy; tech: фильтр / doc: политика |
 ```
 
 Легенда статусов:
 - **✅ covered** — уже реализовано; в привязке стоит id существующего контроля scorecard;
-- **🔧 achievable** — технически достижимо кодом; в привязке — кластер бэклога (`→ 003-detectors`);
+- **🔧 achievable** — технически достижимо кодом; в привязке — кластер бэклога (`→ detectors`);
 - **📄 doc-only** — организационное; представимо только артефактом (policy/runbook/attestation);
 - **(partial)** — mixed-контроль: часть техническая, часть документируемая.
 
@@ -56,11 +56,11 @@ AIUC-1 coverage (version 1.0.0)
 
 ```markdown
 ## Бэклог расширения
-1. 003-detectors (technical) — Детекторы PII/секретов: A006, A008, A005
-2. 004-input-moderation (technical) — Модерация входа: B002, B004, B005
-3. 005-tool-policy (technical) — Политика tool-call + HITL: A003, D003
+1. detectors (technical) — Детекторы PII/секретов: A006, A008, A005
+2. input-moderation (technical) — Модерация входа: B002, B004, B005
+3. tool-policy (technical) — Политика tool-call + HITL: A003, D003
 ...
-7. 008-attestation (organizational) — Стороннее тестирование: C010–C012, D002, D004
+7. attestation (organizational) — Стороннее тестирование: C010–C012, D002, D004
 ```
 
 Первый пункт всегда технический (SC-006) — с него и начинать следующую фичу.

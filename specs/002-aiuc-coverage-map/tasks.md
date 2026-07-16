@@ -91,8 +91,8 @@ tests/coverage/test_covered_grounded.py` зелёный. Это уже само�
 существующий кластер; кластер `priority=1` имеет `nature=technical`.
 
 - [X] T014 [US2] Заполнить секцию `backlog:` в `aiuc1/catalog.yaml` кластерами из
-  [research.md](research.md) R5 (003-detectors, 004-input-moderation, 005-tool-policy,
-  006-output-filters, 007-governance, 008-attestation, 009-society): `id`, `title`, `nature`,
+  [research.md](research.md) R5 (detectors, input-moderation, tool-policy,
+  output-filters, governance, attestation, society): `id`, `title`, `nature`,
   `priority`, `rationale`
 - [X] T015 [US2] Проставить/выверить `backlog_item` у каждого не-`covered` контроля в
   `aiuc1/catalog.yaml` (ровно один кластер на контроль)

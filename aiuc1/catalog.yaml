@@ -6,6 +6,10 @@
 # status: covered | technical_achievable | doc_only | retired
 # nature: technical | organizational | mixed  (partial присутствует ⇔ mixed)
 # covered ⇒ binding.scorecard_control ссылается на реальный контроль scorecard/controls.py.
+#
+# ВАЖНО про id кластеров бэклога: они НЕ кодируют номер будущей фичи (было `003-detectors`).
+# Порядок реализации меняется — например, фича 003 ушла на починку честности метрик, а не на
+# детекторы. За порядок отвечает поле `priority`, за смысл — слаг. Не возвращать номера в id.
 
 version: "1.0.0"
 source: "https://www.aiuc-1.com/evidence (снимок 2026-07-15); 53 контроля, E007/E014 retired"
@@ -19,7 +23,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "политика использования/retention входных данных — документ, не код"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: A002
     pillar: data_privacy
@@ -28,7 +32,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "владение выводом, opt-in/opt-out — политика"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: A003
     pillar: data_privacy
@@ -37,7 +41,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "scoping доступа/идентичность агента в tool-policy" }
     rationale: "механизма ограничения доступа по роли ещё нет; достижимо как политика инструментов"
-    backlog_item: "005-tool-policy"
+    backlog_item: "tool-policy"
 
   - id: A004
     pillar: data_privacy
@@ -49,7 +53,7 @@ controls:
     partial:
       technical: "детект проприетарных паттернов в выводе"
       documentable: "пользовательские гайдлайны по конфиденциальной информации"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: A005
     pillar: data_privacy
@@ -58,7 +62,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "изоляция данных попытки поверх песочницы" }
     rationale: "песочница изолирует попытки; полноценная мультиарендная изоляция — достижимо"
-    backlog_item: "003-detectors"
+    backlog_item: "detectors"
 
   - id: A006
     pillar: data_privacy
@@ -67,7 +71,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "новый PII-детектор во входе/выходе/логах" }
     rationale: "маскирование канарейки есть, но общего PII-детектора ещё нет"
-    backlog_item: "003-detectors"
+    backlog_item: "detectors"
 
   - id: A007
     pillar: data_privacy
@@ -79,7 +83,7 @@ controls:
     partial:
       technical: "фильтр копирайта/торговых марок в выводе"
       documentable: "контракты провайдера, indemnification"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: A008
     pillar: data_privacy
@@ -103,7 +107,7 @@ controls:
     partial:
       technical: "автоматический red-team уже есть (фича 001)"
       documentable: "ежеквартальное стороннее тестирование, аттестация"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   - id: B002
     pillar: security
@@ -112,7 +116,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "детектор adversarial-входа в guardrails/input" }
     rationale: "есть грубая детекция инъекций; полноценный детектор с алертингом — достижимо"
-    backlog_item: "004-input-moderation"
+    backlog_item: "input-moderation"
 
   - id: B003
     pillar: security
@@ -121,7 +125,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "гайдлайны раскрытия и workflow одобрения — процесс"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: B004
     pillar: security
@@ -130,7 +134,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "rate-limit / anomaly-детект" }
     rationale: "лимитов запросов и anomaly-детекта ещё нет; достижимо"
-    backlog_item: "004-input-moderation"
+    backlog_item: "input-moderation"
 
   - id: B005
     pillar: security
@@ -139,7 +143,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "модерация входа с правилами" }
     rationale: "расширение входного guardrail до конфигурируемой модерации"
-    backlog_item: "004-input-moderation"
+    backlog_item: "input-moderation"
 
   - id: B006
     pillar: security
@@ -159,7 +163,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "RBAC и ежеквартальный ревью доступа — процесс/инфраструктура"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: B008
     pillar: security
@@ -168,7 +172,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "API-auth, TLS, integrity — инфраструктура вне области локального учебного стенда"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: B009
     pillar: security
@@ -177,7 +181,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "лимиты объёма/точности вывода в guardrails/output" }
     rationale: "ограничения объёма вывода ещё нет; достижимо в выходном guardrail"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: B010
     pillar: security
@@ -186,7 +190,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "проверки безопасных дефолтов в генерируемом коде" }
     rationale: "стенд не генерирует код; достижимо как отдельная проверка вывода"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   # ---------- C. Safety (12) ----------
   - id: C001
@@ -196,7 +200,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "таксономия рисков с уровнями — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: C002
     pillar: safety
@@ -208,7 +212,7 @@ controls:
     partial:
       technical: "прогон набора атак перед выпуском (фича 001)"
       documentable: "интеграция в SDLC, оценка риска, документирование"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   - id: C003
     pillar: safety
@@ -217,7 +221,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "фильтр вредного вывода в guardrails/output" }
     rationale: "фильтра вредного контента ещё нет; достижимо в выходном guardrail"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: C004
     pillar: safety
@@ -226,7 +230,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "детект out-of-scope в guardrails/output" }
     rationale: "есть частичная детекция вне-ролевых действий (SEC-02), но фильтра out-of-scope вывода нет"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: C005
     pillar: safety
@@ -235,7 +239,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "риск-детект по таксономии в guardrails/output" }
     rationale: "риск-детекта по таксономии ещё нет; достижимо"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: C006
     pillar: safety
@@ -244,7 +248,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "санитизация вывода, метки доверия" }
     rationale: "санитизации вывода ещё нет; достижимо"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: C007
     pillar: safety
@@ -256,7 +260,7 @@ controls:
     partial:
       technical: "детект high-risk вывода и постановка в очередь"
       documentable: "процесс и критерии человеческого ревью"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: C008
     pillar: safety
@@ -268,7 +272,7 @@ controls:
     partial:
       technical: "текущий мониторинг вывода по категориям риска"
       documentable: "SIEM-интеграция, документирование рисков"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: C009
     pillar: safety
@@ -280,7 +284,7 @@ controls:
     partial:
       technical: "механизм вмешательства пользователя в исполнение"
       documentable: "процессы обратной связи и их ревью, доступность"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: C010
     pillar: safety
@@ -289,7 +293,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: third_party_test }
     rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   - id: C011
     pillar: safety
@@ -298,7 +302,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: third_party_test }
     rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   - id: C012
     pillar: safety
@@ -307,7 +311,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: third_party_test }
     rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   # ---------- D. Reliability (4) ----------
   - id: D001
@@ -317,7 +321,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "groundedness-фильтр, цитаты, confidence-метки" }
     rationale: "проверки заземлённости ещё нет; достижимо (нужна база знаний)"
-    backlog_item: "006-output-filters"
+    backlog_item: "output-filters"
 
   - id: D002
     pillar: reliability
@@ -326,7 +330,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: third_party_test }
     rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   - id: D003
     pillar: reliability
@@ -335,7 +339,7 @@ controls:
     status: technical_achievable
     binding: { kind: guardrail_rule, stand_mechanism: "валидация tool-call + human-approval (LangChain HITL middleware)" }
     rationale: "allow-list есть, но валидации аргументов и human-approval ещё нет; достижимо"
-    backlog_item: "005-tool-policy"
+    backlog_item: "tool-policy"
 
   - id: D004
     pillar: reliability
@@ -344,7 +348,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: third_party_test }
     rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
-    backlog_item: "008-attestation"
+    backlog_item: "attestation"
 
   # ---------- E. Accountability (17; E007, E014 — Retired) ----------
   - id: E001
@@ -354,7 +358,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: runbook }
     rationale: "план реагирования на инцидент — runbook"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E002
     pillar: accountability
@@ -363,7 +367,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: runbook }
     rationale: "план реагирования на вредный вывод — runbook"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E003
     pillar: accountability
@@ -372,7 +376,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: runbook }
     rationale: "план реагирования на галлюцинации — runbook"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E004
     pillar: accountability
@@ -381,7 +385,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "назначение ответственности с ролями — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E005
     pillar: accountability
@@ -390,7 +394,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "оценка безопасности хранения — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E006
     pillar: accountability
@@ -399,7 +403,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "vendor due diligence и ревью контрактов — процесс"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E007
     pillar: accountability
@@ -416,7 +420,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "ревью внутренних процессов под AI-governance — процесс"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E009
     pillar: accountability
@@ -425,7 +429,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "мониторинг стороннего доступа и аудит-логи доступа — процесс"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E010
     pillar: accountability
@@ -434,7 +438,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "политика допустимого использования — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E011
     pillar: accountability
@@ -443,7 +447,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "документирование мест обработки — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E012
     pillar: accountability
@@ -452,7 +456,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "документирование соответствия применимым законам — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E013
     pillar: accountability
@@ -461,7 +465,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "система менеджмента качества — организационная практика"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E014
     pillar: accountability
@@ -489,7 +493,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "механизмы раскрытия/прозрачности — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   - id: E017
     pillar: accountability
@@ -498,7 +502,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "политика прозрачности системы — документ"
-    backlog_item: "007-governance"
+    backlog_item: "governance"
 
   # ---------- F. Society (2) ----------
   - id: F001
@@ -508,7 +512,7 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "у нас есть учебные SOC-01/02, но полноценное предотвращение кибер-мисьюза — процесс+фильтры"
-    backlog_item: "009-society"
+    backlog_item: "society"
 
   - id: F002
     pillar: society
@@ -517,46 +521,46 @@ controls:
     status: doc_only
     binding: { kind: artifact, artifact_type: policy }
     rationale: "предотвращение катастрофического мисьюза — процесс и надзор"
-    backlog_item: "009-society"
+    backlog_item: "society"
 
 backlog:
-  - id: "003-detectors"
+  - id: "detectors"
     title: "Детекторы PII/секретов и изоляция данных"
     nature: technical
     priority: 1
     rationale: "прямое продолжение Data & Privacy; новые guardrail-детекторы + предикаты — максимальная отдача первым шагом"
 
-  - id: "004-input-moderation"
+  - id: "input-moderation"
     title: "Модерация входа и anomaly-детект"
     nature: technical
     priority: 2
     rationale: "расширяет входной guardrail: детект adversarial-входа, rate-limit, фильтрация"
 
-  - id: "005-tool-policy"
+  - id: "tool-policy"
     title: "Политика tool-call и human-approval (HITL)"
     nature: technical
     priority: 3
     rationale: "scoping доступа и валидация tool-call через LangChain HITL middleware"
 
-  - id: "006-output-filters"
+  - id: "output-filters"
     title: "Фильтры вывода и надёжность"
     nature: technical
     priority: 4
     rationale: "фильтры вредного/out-of-scope вывода, лимиты объёма, groundedness"
 
-  - id: "007-governance"
+  - id: "governance"
     title: "Governance-артефакты (политики, планы, runbook'и)"
     nature: organizational
     priority: 5
     rationale: "весь организационный пласт Accountability и политики — документация, не прогон"
 
-  - id: "008-attestation"
+  - id: "attestation"
     title: "Стороннее тестирование (attestation)"
     nature: organizational
     priority: 6
     rationale: "ежеквартальные сторонние тесты и аттестация — требуют внешнего аудитора"
 
-  - id: "009-society"
+  - id: "society"
     title: "Society: кибер- и катастрофический мисьюз"
     nature: organizational
     priority: 7
