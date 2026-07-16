@@ -85,5 +85,38 @@ def demo(suite: str = typer.Option("attacks/suite.yaml", help="Файл набо
     run_demo(Path(suite))
 
 
+@app.command()
+def coverage(
+    catalog: str = typer.Option("aiuc1/catalog.yaml", help="Файл каталога контролей AIUC-1."),
+    out: str = typer.Option("docs/aiuc1-coverage.md", help="Куда записать карту."),
+) -> None:
+    """Построить карту покрытия AIUC-1 из каталога (фича 002)."""
+    from pathlib import Path
+
+    from .aiuc1.catalog import Catalog, aggregate
+    from .aiuc1.render import render_to_file
+
+    cat = Catalog.load(Path(catalog))
+    agg = aggregate(cat)
+    active = sum(agg.by_status.values())
+    typer.echo(f"AIUC-1 coverage (version {cat.version})")
+    typer.echo(
+        f"  всего {len(cat.controls)} (активных {active}, retired {agg.retired_count})"
+    )
+    typer.echo(
+        f"  covered {agg.by_status['covered']} / achievable "
+        f"{agg.by_status['technical_achievable']} / doc-only {agg.by_status['doc_only']}"
+        f"  (partial {agg.partial_count})"
+    )
+    _letter = {
+        "data_privacy": "A", "security": "B", "safety": "C",
+        "reliability": "D", "accountability": "E", "society": "F",
+    }
+    pillars = "  ".join(f"{_letter[k]} {v}" for k, v in agg.by_pillar.items())
+    typer.echo(f"  по пиллерам (активные): {pillars}")
+    path = render_to_file(cat, Path(out))
+    typer.echo(f"Карта: {path}")
+
+
 if __name__ == "__main__":
     app()

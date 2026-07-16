@@ -1,0 +1,563 @@
+# Машиночитаемый каталог покрытия AIUC-1 — ЕДИНСТВЕННЫЙ источник истины карты.
+# docs/aiuc1-coverage.md порождается из этого файла (aiuc coverage); руками карту не правят.
+#
+# Источник: https://www.aiuc-1.com/evidence (снимок 2026-07-15).
+# Стандарт нумерует 53 контроля; E007 и E014 — Retired → 51 активный.
+# status: covered | technical_achievable | doc_only | retired
+# nature: technical | organizational | mixed  (partial присутствует ⇔ mixed)
+# covered ⇒ binding.scorecard_control ссылается на реальный контроль scorecard/controls.py.
+
+version: "1.0.0"
+source: "https://www.aiuc-1.com/evidence (снимок 2026-07-15); 53 контроля, E007/E014 retired"
+
+controls:
+  # ---------- A. Data & Privacy (8) ----------
+  - id: A001
+    pillar: data_privacy
+    title: "Establish input data policy"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "политика использования/retention входных данных — документ, не код"
+    backlog_item: "007-governance"
+
+  - id: A002
+    pillar: data_privacy
+    title: "Establish output data policy"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "владение выводом, opt-in/opt-out — политика"
+    backlog_item: "007-governance"
+
+  - id: A003
+    pillar: data_privacy
+    title: "Limit AI agent data access"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "scoping доступа/идентичность агента в tool-policy" }
+    rationale: "механизма ограничения доступа по роли ещё нет; достижимо как политика инструментов"
+    backlog_item: "005-tool-policy"
+
+  - id: A004
+    pillar: data_privacy
+    title: "Protect IP & trade secrets"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "часть — фильтр IP (техническая), часть — гайдлайны пользователю (документ)"
+    partial:
+      technical: "детект проприетарных паттернов в выводе"
+      documentable: "пользовательские гайдлайны по конфиденциальной информации"
+    backlog_item: "007-governance"
+
+  - id: A005
+    pillar: data_privacy
+    title: "Prevent cross-customer data exposure"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "изоляция данных попытки поверх песочницы" }
+    rationale: "песочница изолирует попытки; полноценная мультиарендная изоляция — достижимо"
+    backlog_item: "003-detectors"
+
+  - id: A006
+    pillar: data_privacy
+    title: "Prevent PII leakage"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "новый PII-детектор во входе/выходе/логах" }
+    rationale: "маскирование канарейки есть, но общего PII-детектора ещё нет"
+    backlog_item: "003-detectors"
+
+  - id: A007
+    pillar: data_privacy
+    title: "Prevent IP violations"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "защита провайдера (контракт) + фильтр контента (техническая часть)"
+    partial:
+      technical: "фильтр копирайта/торговых марок в выводе"
+      documentable: "контракты провайдера, indemnification"
+    backlog_item: "007-governance"
+
+  - id: A008
+    pillar: data_privacy
+    title: "Prevent leakage of credentials and secrets"
+    nature: technical
+    status: covered
+    binding:
+      kind: scorecard_control
+      scorecard_control: PRIV-02
+      stand_mechanism: "детект секрета (канарейки) в выводе/аргументах + маскирование в trace"
+    rationale: "детект и редакция секрета реализованы; общий secrets-store вне области — сужение честно отражено"
+
+  # ---------- B. Security (10) ----------
+  - id: B001
+    pillar: security
+    title: "Third-party testing of adversarial robustness"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: attestation }
+    rationale: "у нас есть red-team, но контроль требует стороннего аудитора и периодичности"
+    partial:
+      technical: "автоматический red-team уже есть (фича 001)"
+      documentable: "ежеквартальное стороннее тестирование, аттестация"
+    backlog_item: "008-attestation"
+
+  - id: B002
+    pillar: security
+    title: "Detect adversarial input"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "детектор adversarial-входа в guardrails/input" }
+    rationale: "есть грубая детекция инъекций; полноценный детектор с алертингом — достижимо"
+    backlog_item: "004-input-moderation"
+
+  - id: B003
+    pillar: security
+    title: "Manage public release of technical details"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "гайдлайны раскрытия и workflow одобрения — процесс"
+    backlog_item: "007-governance"
+
+  - id: B004
+    pillar: security
+    title: "Prevent AI endpoint scraping"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "rate-limit / anomaly-детект" }
+    rationale: "лимитов запросов и anomaly-детекта ещё нет; достижимо"
+    backlog_item: "004-input-moderation"
+
+  - id: B005
+    pillar: security
+    title: "Implement real-time input filtering"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "модерация входа с правилами" }
+    rationale: "расширение входного guardrail до конфигурируемой модерации"
+    backlog_item: "004-input-moderation"
+
+  - id: B006
+    pillar: security
+    title: "Prevent unauthorized AI agent actions"
+    nature: technical
+    status: covered
+    binding:
+      kind: scorecard_control
+      scorecard_control: SAF-01
+      stand_mechanism: "allow-list (wrap_tool_call) + песочница; запрещённый инструмент не исполняется"
+    rationale: "несанкционированные действия агента пресекаются политикой инструментов и песочницей"
+
+  - id: B007
+    pillar: security
+    title: "Enforce user access privileges to AI systems"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "RBAC и ежеквартальный ревью доступа — процесс/инфраструктура"
+    backlog_item: "007-governance"
+
+  - id: B008
+    pillar: security
+    title: "Protect AI system deployment environment"
+    nature: technical
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "API-auth, TLS, integrity — инфраструктура вне области локального учебного стенда"
+    backlog_item: "007-governance"
+
+  - id: B009
+    pillar: security
+    title: "Limit output over-exposure"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "лимиты объёма/точности вывода в guardrails/output" }
+    rationale: "ограничения объёма вывода ещё нет; достижимо в выходном guardrail"
+    backlog_item: "006-output-filters"
+
+  - id: B010
+    pillar: security
+    title: "Promote secure patterns in generated code"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "проверки безопасных дефолтов в генерируемом коде" }
+    rationale: "стенд не генерирует код; достижимо как отдельная проверка вывода"
+    backlog_item: "006-output-filters"
+
+  # ---------- C. Safety (12) ----------
+  - id: C001
+    pillar: safety
+    title: "Define AI risk taxonomy"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "таксономия рисков с уровнями — документ"
+    backlog_item: "007-governance"
+
+  - id: C002
+    pillar: safety
+    title: "Conduct pre-deployment testing"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: attestation }
+    rationale: "прогон атак есть (технически), но контроль требует SDLC-гейта и документирования"
+    partial:
+      technical: "прогон набора атак перед выпуском (фича 001)"
+      documentable: "интеграция в SDLC, оценка риска, документирование"
+    backlog_item: "008-attestation"
+
+  - id: C003
+    pillar: safety
+    title: "Prevent harmful outputs"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "фильтр вредного вывода в guardrails/output" }
+    rationale: "фильтра вредного контента ещё нет; достижимо в выходном guardrail"
+    backlog_item: "006-output-filters"
+
+  - id: C004
+    pillar: safety
+    title: "Prevent out-of-scope outputs"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "детект out-of-scope в guardrails/output" }
+    rationale: "есть частичная детекция вне-ролевых действий (SEC-02), но фильтра out-of-scope вывода нет"
+    backlog_item: "006-output-filters"
+
+  - id: C005
+    pillar: safety
+    title: "Prevent agent-specific high risk outputs"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "риск-детект по таксономии в guardrails/output" }
+    rationale: "риск-детекта по таксономии ещё нет; достижимо"
+    backlog_item: "006-output-filters"
+
+  - id: C006
+    pillar: safety
+    title: "Prevent output vulnerabilities"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "санитизация вывода, метки доверия" }
+    rationale: "санитизации вывода ещё нет; достижимо"
+    backlog_item: "006-output-filters"
+
+  - id: C007
+    pillar: safety
+    title: "Flag high risk outputs for human review"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "детект high-risk (техническая часть) + процесс human review (организационная)"
+    partial:
+      technical: "детект high-risk вывода и постановка в очередь"
+      documentable: "процесс и критерии человеческого ревью"
+    backlog_item: "007-governance"
+
+  - id: C008
+    pillar: safety
+    title: "Monitor AI risk categories"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "мониторинг вывода (техническая часть) + SIEM/документирование (организационная)"
+    partial:
+      technical: "текущий мониторинг вывода по категориям риска"
+      documentable: "SIEM-интеграция, документирование рисков"
+    backlog_item: "007-governance"
+
+  - id: C009
+    pillar: safety
+    title: "Enable real-time feedback and intervention"
+    nature: mixed
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "механизм вмешательства (техническая часть) + процессы обратной связи (организационная)"
+    partial:
+      technical: "механизм вмешательства пользователя в исполнение"
+      documentable: "процессы обратной связи и их ревью, доступность"
+    backlog_item: "007-governance"
+
+  - id: C010
+    pillar: safety
+    title: "Third-party testing for harmful outputs"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: third_party_test }
+    rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
+    backlog_item: "008-attestation"
+
+  - id: C011
+    pillar: safety
+    title: "Third-party testing for out-of-scope outputs"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: third_party_test }
+    rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
+    backlog_item: "008-attestation"
+
+  - id: C012
+    pillar: safety
+    title: "Third-party testing for customer-defined risk"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: third_party_test }
+    rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
+    backlog_item: "008-attestation"
+
+  # ---------- D. Reliability (4) ----------
+  - id: D001
+    pillar: reliability
+    title: "Prevent hallucinated outputs"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "groundedness-фильтр, цитаты, confidence-метки" }
+    rationale: "проверки заземлённости ещё нет; достижимо (нужна база знаний)"
+    backlog_item: "006-output-filters"
+
+  - id: D002
+    pillar: reliability
+    title: "Third-party testing for hallucinations"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: third_party_test }
+    rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
+    backlog_item: "008-attestation"
+
+  - id: D003
+    pillar: reliability
+    title: "Restrict unsafe tool calls"
+    nature: technical
+    status: technical_achievable
+    binding: { kind: guardrail_rule, stand_mechanism: "валидация tool-call + human-approval (LangChain HITL middleware)" }
+    rationale: "allow-list есть, но валидации аргументов и human-approval ещё нет; достижимо"
+    backlog_item: "005-tool-policy"
+
+  - id: D004
+    pillar: reliability
+    title: "Third-party testing of tool calls"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: third_party_test }
+    rationale: "ежеквартальное стороннее тестирование — требует внешнего аудитора"
+    backlog_item: "008-attestation"
+
+  # ---------- E. Accountability (17; E007, E014 — Retired) ----------
+  - id: E001
+    pillar: accountability
+    title: "AI failure plan for security breaches"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "план реагирования на инцидент — runbook"
+    backlog_item: "007-governance"
+
+  - id: E002
+    pillar: accountability
+    title: "AI failure plan for harmful outputs"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "план реагирования на вредный вывод — runbook"
+    backlog_item: "007-governance"
+
+  - id: E003
+    pillar: accountability
+    title: "AI failure plan for hallucinations"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: runbook }
+    rationale: "план реагирования на галлюцинации — runbook"
+    backlog_item: "007-governance"
+
+  - id: E004
+    pillar: accountability
+    title: "Assign accountability"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "назначение ответственности с ролями — документ"
+    backlog_item: "007-governance"
+
+  - id: E005
+    pillar: accountability
+    title: "Document data storage security"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "оценка безопасности хранения — документ"
+    backlog_item: "007-governance"
+
+  - id: E006
+    pillar: accountability
+    title: "Conduct vendor due diligence"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "vendor due diligence и ревью контрактов — процесс"
+    backlog_item: "007-governance"
+
+  - id: E007
+    pillar: accountability
+    title: "[Retired] Document system change approvals"
+    nature: organizational
+    status: retired
+    binding: { kind: none }
+    rationale: "отозван стандартом AIUC-1"
+
+  - id: E008
+    pillar: accountability
+    title: "Review internal processes"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "ревью внутренних процессов под AI-governance — процесс"
+    backlog_item: "007-governance"
+
+  - id: E009
+    pillar: accountability
+    title: "Monitor third-party access"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "мониторинг стороннего доступа и аудит-логи доступа — процесс"
+    backlog_item: "007-governance"
+
+  - id: E010
+    pillar: accountability
+    title: "Establish AI acceptable use policy"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "политика допустимого использования — документ"
+    backlog_item: "007-governance"
+
+  - id: E011
+    pillar: accountability
+    title: "Record processing locations"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "документирование мест обработки — документ"
+    backlog_item: "007-governance"
+
+  - id: E012
+    pillar: accountability
+    title: "Document regulatory compliance"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "документирование соответствия применимым законам — документ"
+    backlog_item: "007-governance"
+
+  - id: E013
+    pillar: accountability
+    title: "Implement quality management system"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "система менеджмента качества — организационная практика"
+    backlog_item: "007-governance"
+
+  - id: E014
+    pillar: accountability
+    title: "[Retired] Share transparency reports"
+    nature: organizational
+    status: retired
+    binding: { kind: none }
+    rationale: "отозван стандартом AIUC-1"
+
+  - id: E015
+    pillar: accountability
+    title: "Log AI system activity"
+    nature: technical
+    status: covered
+    binding:
+      kind: scorecard_control
+      scorecard_control: ACC-01
+      stand_mechanism: "структурированный JSONL-trace всех шагов + ACC-01/ACC-02"
+    rationale: "логирование активности с аудит-трейлом реализовано (trace/writer.py, контроли ACC)"
+
+  - id: E016
+    pillar: accountability
+    title: "Implement AI disclosure mechanisms"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "механизмы раскрытия/прозрачности — документ"
+    backlog_item: "007-governance"
+
+  - id: E017
+    pillar: accountability
+    title: "Document system transparency policy"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "политика прозрачности системы — документ"
+    backlog_item: "007-governance"
+
+  # ---------- F. Society (2) ----------
+  - id: F001
+    pillar: society
+    title: "Prevent AI cyber misuse"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "у нас есть учебные SOC-01/02, но полноценное предотвращение кибер-мисьюза — процесс+фильтры"
+    backlog_item: "009-society"
+
+  - id: F002
+    pillar: society
+    title: "Prevent catastrophic misuse"
+    nature: organizational
+    status: doc_only
+    binding: { kind: artifact, artifact_type: policy }
+    rationale: "предотвращение катастрофического мисьюза — процесс и надзор"
+    backlog_item: "009-society"
+
+backlog:
+  - id: "003-detectors"
+    title: "Детекторы PII/секретов и изоляция данных"
+    nature: technical
+    priority: 1
+    rationale: "прямое продолжение Data & Privacy; новые guardrail-детекторы + предикаты — максимальная отдача первым шагом"
+
+  - id: "004-input-moderation"
+    title: "Модерация входа и anomaly-детект"
+    nature: technical
+    priority: 2
+    rationale: "расширяет входной guardrail: детект adversarial-входа, rate-limit, фильтрация"
+
+  - id: "005-tool-policy"
+    title: "Политика tool-call и human-approval (HITL)"
+    nature: technical
+    priority: 3
+    rationale: "scoping доступа и валидация tool-call через LangChain HITL middleware"
+
+  - id: "006-output-filters"
+    title: "Фильтры вывода и надёжность"
+    nature: technical
+    priority: 4
+    rationale: "фильтры вредного/out-of-scope вывода, лимиты объёма, groundedness"
+
+  - id: "007-governance"
+    title: "Governance-артефакты (политики, планы, runbook'и)"
+    nature: organizational
+    priority: 5
+    rationale: "весь организационный пласт Accountability и политики — документация, не прогон"
+
+  - id: "008-attestation"
+    title: "Стороннее тестирование (attestation)"
+    nature: organizational
+    priority: 6
+    rationale: "ежеквартальные сторонние тесты и аттестация — требуют внешнего аудитора"
+
+  - id: "009-society"
+    title: "Society: кибер- и катастрофический мисьюз"
+    nature: organizational
+    priority: 7
+    rationale: "предотвращение мисьюза — процесс и надзор, за пределами локального стенда"

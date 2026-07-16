@@ -20,6 +20,7 @@ RUN uv sync --extra anthropic --no-install-project --frozen
 # Код проекта.
 COPY src ./src
 COPY attacks ./attacks
+COPY aiuc1 ./aiuc1
 COPY tests ./tests
 
 # Доустанавливаем сам пакет aiuc-mini в окружение.

@@ -95,7 +95,7 @@ backlog:
 |---|---|---|
 | ровно 53 контроля, точный набор id, без дублей | `test_catalog_valid` | FR-001, SC-001 |
 | `pillar` согласован с буквой `id` | `test_catalog_valid` | FR-001 |
-| сумма по базовым статусам == 53 | `test_catalog_valid` | FR-009 |
+| сумма по базовым статусам == 51 (активные) | `test_catalog_valid` | FR-009 |
 | `status=covered` ⇒ `scorecard_control` существует в `scorecard/controls.py` | `test_covered_grounded` | **SC-004** |
 | `status≠covered` ⇒ `backlog_item` ссылается на существующий кластер | `test_catalog_valid` | FR-006, SC-002 |
 | `partial` ⇔ `nature=mixed` | `test_catalog_valid` | FR-002 |

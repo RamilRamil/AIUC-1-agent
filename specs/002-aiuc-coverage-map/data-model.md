@@ -17,17 +17,18 @@
 | `pillar` | `Pillar` | `data_privacy` \| `security` \| `safety` \| `reliability` \| `accountability` \| `society` — выводится из буквы id и должен ей соответствовать |
 | `title` | `str` | краткое человекочитаемое описание контроля |
 | `nature` | `Nature` | `technical` \| `organizational` \| `mixed` |
-| `status` | `Status` | базовый статус: `covered` \| `technical_achievable` \| `doc_only` |
+| `status` | `Status` | `covered` \| `technical_achievable` \| `doc_only` \| `retired` (для 2 отозванных E007/E014) |
 | `binding` | `Binding` | привязка (см. §2) |
 | `rationale` | `str` | почему такой статус/природа |
 | `partial` | `Partial \| None` | заполнено только для `nature=mixed` (см. §3) |
-| `backlog_item` | `str \| None` | id кластера бэклога; `None` только для `status=covered` |
+| `backlog_item` | `str \| None` | id кластера бэклога; `None` для `covered` и `retired` |
 
 **Инварианты**:
 - `pillar` MUST соответствовать префиксу `id` (A→data_privacy, B→security, C→safety,
   D→reliability, E→accountability, F→society);
 - `status=covered` ⇒ `binding.scorecard_control` заполнено и `backlog_item is None`;
-- `status≠covered` ⇒ `backlog_item` заполнено (контроль обязан попасть в план);
+- `status=retired` ⇒ освобождён от правил покрытия и бэклога (это E007/E014);
+- `status ∈ {technical_achievable, doc_only}` ⇒ `backlog_item` заполнено (контроль обязан попасть в план);
 - `partial` заполнено ⇔ `nature=mixed`.
 
 ---
@@ -100,10 +101,11 @@
 
 | Агрегат | Правило |
 |---|---|
-| `by_status` | число контролей по каждому базовому статусу; **сумма == 53** (FR-009) |
-| `by_pillar` | число контролей по каждому пиллеру |
+| `by_status` | число контролей по каждому базовому статусу; **сумма == 51** (активные, FR-009) |
+| `by_pillar` | число активных контролей по каждому пиллеру |
 | `partial_count` | число контролей с `partial` (отдельно, не в сумме статусов) |
-| `coverage_pct` | доля `covered` от 53 |
+| `retired_count` | число `retired` (2: E007, E014) |
+| `coverage_pct` | доля `covered` от активных (51) |
 
 **Инвариант воспроизводимости** (Принцип IV): агрегаты и Markdown-рендер — чистые функции от
 каталога; тот же каталог даёт тот же результат побайтово.

@@ -21,10 +21,11 @@ docker compose run --rm aiuc coverage
 
 ```
 AIUC-1 coverage (version 1.0.0)
-  covered:              5 / 53   (9%)
-  technical-achievable: 14 / 53
-  doc-only:             34 / 53
-  partial (mixed):      6
+  всего 53 (активных 51, retired 2)
+  covered:              3 / 51   (5.9%)
+  technical-achievable: 14 / 51
+  doc-only:             34 / 51
+  partial (mixed):      7
 По пиллерам: A 8 | B 10 | C 12 | D 4 | E 15 | F 2
 Карта: docs/aiuc1-coverage.md
 ```
@@ -73,7 +74,7 @@ docker compose run --rm test tests/coverage/
 ```
 
 Что проверяется:
-- ровно 53 контроля, верные id, сумма по статусам == 53;
+- ровно 53 контроля, верные id, сумма по базовым статусам == 51 (активные; E007/E014 retired);
 - **ни один `covered` не ссылается на несуществующий контроль scorecard** (SC-004) — карта не
   может соврать про покрытие, пока тест зелёный;
 - Markdown порождён из каталога и не разошёлся с ним (SC-003).
