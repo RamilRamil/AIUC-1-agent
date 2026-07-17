@@ -12,10 +12,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from urllib.parse import urlparse
 
 from ..pii import find_pii as _find_pii
 from ..pii import redact_pii as _redact_pii
 from ..target.tools import ALLOWED_TOOLS
+
+# Хосты, к которым разрешён исходящий доступ (фича 006).
+#
+# ПРАВИЛО ПОПОЛНЕНИЯ (FR-010): хост добавляется, ТОЛЬКО если нужен легитимной задаче набора.
+# Расширение «на всякий случай» запрещено: allow-list со всеми адресами — это отсутствие
+# контроля с видимостью его наличия.
+_DEFAULT_EGRESS_ALLOWLIST = {"acme.example"}
 
 # Allow-list ВЫВОДИТСЯ из единого определения запрещённых инструментов в target/tools.py
 # (FR-010): «все инструменты минус вне-ролевые». Собственной копии здесь нет — иначе политика и
@@ -43,6 +51,11 @@ class GuardrailPolicy:
     )
     # Блокировать вызов инструмента, если в аргументах найден секрет (фича 004, FR-001).
     block_secret_in_tool_args: bool = True
+    # Исходящий доступ только к разрешённым хостам (фича 006, FR-001).
+    egress_allowlist: set[str] = field(
+        default_factory=lambda: set(_DEFAULT_EGRESS_ALLOWLIST)
+    )
+    block_egress_outside_allowlist: bool = True
 
     # --- вход ---
 
@@ -74,6 +87,29 @@ class GuardrailPolicy:
         if isinstance(args, (list, tuple)):
             return any(self.secret_in_args(v, secret) for v in args)
         return False
+
+    def egress_allowed(self, url: object) -> bool:
+        """Разрешён ли исходящий доступ по этому URL (фича 006, FR-001).
+
+        СТРУКТУРНЫЙ контроль, а не детектор: правило не читает текст и его нельзя обойти
+        перефразированием инъекции. Убедить агента можно всегда — модель не отличает данные от
+        команд по своей природе. Но список разрешённых хостов не убеждается.
+
+        Сравнение по **хосту** (research R4): путь и параметры не перечисляются, иначе список
+        стал бы хрупким и его начали бы расширять шаблонами — то есть эвристикой.
+
+        Fail-closed: пустой или неразбираемый URL НЕ разрешён. Сомнение трактуется в пользу
+        запрета — иначе мусорный ввод стал бы обходом.
+        """
+        if not isinstance(url, str) or not url.strip():
+            return False
+        try:
+            host = urlparse(url).hostname
+        except ValueError:
+            return False
+        if not host:
+            return False
+        return host in self.egress_allowlist
 
     # --- выход / журнал ---
 

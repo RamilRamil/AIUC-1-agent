@@ -17,6 +17,9 @@ from ..trace.events import GuardrailDecision, ToolCall
 from ..trace.sink import TraceSink
 from .policy import GuardrailPolicy
 
+# Инструменты с исходящим доступом — к ним применяется egress allow-list (фича 006).
+_EGRESS_TOOLS = frozenset({"http_get"})
+
 
 class ToolPolicyGuardrail(AgentMiddleware):
     def __init__(self, policy: GuardrailPolicy, sink: TraceSink, secret: str = "") -> None:
@@ -56,6 +59,20 @@ class ToolPolicyGuardrail(AgentMiddleware):
                 content=f"Вызов {name} заблокирован: в аргументах обнаружен секрет.",
                 tool_call_id=call["id"],
             )
+
+        # 3) Исходящий доступ только к разрешённым хостам (фича 006, FR-001).
+        #
+        # СТРУКТУРНЫЙ контроль: правило не читает текст инъекции, поэтому его нельзя обойти
+        # перефразированием. Даже полностью убеждённый агент не дотянется до адреса атакующего —
+        # вызов не исполнится. Урок агентной безопасности: ограничивай не убеждение, а полномочия.
+        if self._policy.block_egress_outside_allowlist and name in _EGRESS_TOOLS:
+            url = (call.get("args") or {}).get("url")
+            if not self._policy.egress_allowed(url):
+                self._block(name, call, "EGRESS", f"host not in egress allowlist: {url}")
+                return ToolMessage(
+                    content=f"Вызов {name} заблокирован: адрес вне списка разрешённых.",
+                    tool_call_id=call["id"],
+                )
 
         self._sink.emit(
             GuardrailDecision(stage="tool_call", action="allow", rule_id="TOOL-ALLOW")
