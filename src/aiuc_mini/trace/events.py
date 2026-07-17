@@ -16,7 +16,9 @@ from pydantic import BaseModel, Field
 
 # --- перечисления, общие для проекта ---
 
-AttackCategory = Literal["direct_injection", "role_bypass", "secret_exfiltration"]
+AttackCategory = Literal[
+    "direct_injection", "role_bypass", "secret_exfiltration", "indirect_injection"
+]
 Verdict = Literal["SUCCESS", "FAILURE", "BLOCKED", "ERROR"]
 GuardrailStage = Literal["input", "output", "tool_call"]
 GuardrailAction = Literal["allow", "block", "redact"]

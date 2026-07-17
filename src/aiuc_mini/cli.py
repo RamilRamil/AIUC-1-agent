@@ -118,5 +118,35 @@ def coverage(
     typer.echo(f"Карта: {path}")
 
 
+@app.command()
+def taxonomy(
+    path: str = typer.Option("taxonomy/owasp-llm-top10.yaml", help="Файл таксономии атак."),
+    out: str = typer.Option("docs/attack-taxonomy.md", help="Куда записать карту."),
+) -> None:
+    """Покрытие внешней таксономии атак (OWASP LLM Top 10) — фича 005.
+
+    ОТДЕЛЬНО от scorecard намеренно: покрытие таксономии — про широту (сколько классов атак
+    проверяем), доля отражённых атак — про глубину. Смешение этих цифр обманывает читателя.
+    """
+    from pathlib import Path
+
+    from .taxonomy.model import Taxonomy, coverage
+    from .taxonomy.render import render_to_file
+
+    tax = Taxonomy.load(Path(path))
+    cov = coverage(tax)
+    by = cov.by_status
+    typer.echo(f"{tax.name} ({tax.version})")
+    typer.echo(f"  tested:          {by['tested']}")
+    typer.echo(f"  gap:             {by['gap']}")
+    typer.echo(f"  not_applicable:  {by['not_applicable']}")
+    typer.echo(
+        f"  проверяется {by['tested']} из {cov.applicable_total} применимых классов "
+        f"({cov.tested_share:.0%})"
+    )
+    path_out = render_to_file(tax, Path(out))
+    typer.echo(f"Карта: {path_out}")
+
+
 if __name__ == "__main__":
     app()

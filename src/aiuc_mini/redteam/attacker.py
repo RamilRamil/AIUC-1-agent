@@ -41,6 +41,10 @@ def mutate(attack: AttackCase, iteration: int, model: BaseChatModel | None) -> A
         category=attack.category,
         payload=new_payload,
         success_criterion=attack.success_criterion,
+        # Мутация наследует привязку к внешней таксономии: меняется формулировка, а не класс
+        # атаки. Пропустить это поле нельзя — оно обязательно (фича 005), и его отсутствие
+        # ValidationError'ом гасило бы мутацию внутри try/except раннера, то есть ТИХО.
+        taxonomy=attack.taxonomy,
         parent_id=attack.id,
         is_benign=attack.is_benign,
     )

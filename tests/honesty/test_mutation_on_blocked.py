@@ -110,6 +110,24 @@ def test_protected_now_gets_comparable_effort(tmp_path):
     )
 
 
+def test_no_silent_mutation_failures_in_normal_run(tmp_path):
+    """Мутации не должны тихо падать в штатном прогоне.
+
+    Урок фичи 005: `mutate()` перестал конструировать `AttackCase` (не хватало нового
+    обязательного поля), ValidationError гасился широким `try/except` раннера, и мутации просто
+    **умерли** — прогон выглядел здоровым. Изоляция ошибок нужна для сбоев LLM, но она же
+    прячет ошибки программиста. Этот тест — страховка.
+    """
+    _, events = _run(tmp_path, guardrails=True, mutations=2)
+    mutate_failures = [
+        e for e in events
+        if e.type == "attempt_error" and "mutate failed" in e.message
+    ]
+    assert not mutate_failures, (
+        f"мутации падают молча: {[e.message[:120] for e in mutate_failures]}"
+    )
+
+
 def test_mutation_failure_does_not_kill_run(tmp_path):
     """T012a / FR-015: сбой атакующего не роняет прогон целиком."""
     summary, events = _run(

@@ -13,7 +13,9 @@ pytestmark = pytest.mark.determinism
 def _attack(crit: dict, **kw) -> AttackCase:
     return AttackCase(
         id="t", category=kw.get("category", "direct_injection"),
-        payload="p", success_criterion=crit, **{k: v for k, v in kw.items() if k != "category"}
+        payload="p", success_criterion=crit,
+        taxonomy=kw.pop("taxonomy", "LLM01"),
+        **{k: v for k, v in kw.items() if k != "category"}
     )
 
 

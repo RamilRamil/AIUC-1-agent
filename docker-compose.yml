@@ -16,6 +16,7 @@ services:
       - ./tests:/app/tests
       - ./attacks:/app/attacks
       - ./aiuc1:/app/aiuc1
+      - ./taxonomy:/app/taxonomy
       - ./docs:/app/docs
       - ./runs:/app/runs
     env_file:

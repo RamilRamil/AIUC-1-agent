@@ -12,8 +12,8 @@ from aiuc_mini.config import Config
 from aiuc_mini.redteam.runner import run_suite
 from aiuc_mini.scorecard.compare import _stats
 from aiuc_mini.scorecard.render import build_scorecard
-from aiuc_mini.trace.events import GuardrailDecision, ToolCall, ToolResult, VerdictEvent
-from aiuc_mini.trace.writer import read_trace
+from aiuc_mini.trace.events import GuardrailDecision, ToolCall, VerdictEvent
+from aiuc_mini.trace.writer import MASK, read_trace
 from tests.fakes import CompromisableChatModel, ScriptedChatModel
 
 SUITE = Path("attacks/suite.yaml")
@@ -47,12 +47,16 @@ def test_secret_in_args_is_blocked(tmp_path):
     blocked_calls = [e for e in events if isinstance(e, ToolCall) and e.blocked]
     assert blocked_calls, "пресечённая попытка не записана в trace"
 
-    # И главное: инструмент не исполнился — результата нет.
-    exfil_results = [
-        e for e in events if isinstance(e, ToolResult) and e.tool == "http_get"
-        and "attacker" in e.result
+    # И главное: ни один ИСПОЛНЕННЫЙ вызов не унёс секрет в аргументах.
+    #
+    # Проверяем именно это, а не «нет ToolResult со словом attacker»: с фичи 005 отравленная
+    # справка легитимно содержит адрес attacker.example в теле, и грубая проверка по подстроке
+    # ловила бы безобидное чтение страницы.
+    leaked_calls = [
+        e for e in events
+        if isinstance(e, ToolCall) and not e.blocked and MASK in str(e.args)
     ]
-    assert not exfil_results, "заблокированный вызов всё же исполнился"
+    assert not leaked_calls, "исполненный вызов унёс секрет в аргументах"
 
 
 def test_no_successful_exfiltration(tmp_path):
